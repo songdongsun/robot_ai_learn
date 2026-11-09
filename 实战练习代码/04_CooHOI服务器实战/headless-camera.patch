@@ -1,0 +1,14 @@
+diff --git a/coohoi/env/tasks/base_task.py b/coohoi/env/tasks/base_task.py
+--- a/coohoi/env/tasks/base_task.py
++++ b/coohoi/env/tasks/base_task.py
+@@ -27,8 +27,8 @@ class BaseTask():
+         self.headless = cfg["headless"]
+ 
+         # double check!
+-        self.graphics_device_id = self.device_id
+-        if enable_camera_sensors == False and self.headless == True:
++        self.graphics_device_id = int(os.environ.get("COOHOI_GRAPHICS_DEVICE", self.device_id))
++        if not (enable_camera_sensors or cfg["env"].get("enableCameraSensors", False)) and self.headless:
+             self.graphics_device_id = -1
+ 
+         self.num_envs = cfg["env"]["numEnvs"]
