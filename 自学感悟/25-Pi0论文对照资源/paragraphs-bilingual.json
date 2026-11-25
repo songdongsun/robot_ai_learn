@@ -1,0 +1,1056 @@
+[
+  {
+    "id": "p1-para1",
+    "page": 1,
+    "source_blocks": [
+      0,
+      1
+    ],
+    "en": "π0: A Vision-Language-Action Flow Model for General Robot Control",
+    "zh": "π0：面向通用机器人控制的视觉—语言—动作流模型"
+  },
+  {
+    "id": "p1-para2",
+    "page": 1,
+    "source_blocks": [
+      2,
+      3,
+      4
+    ],
+    "en": "Physical Intelligence Kevin Black, Noah Brown, Danny Driess, Adnan Esmail, Michael Equi, Chelsea Finn, Niccolo Fusai, Lachy Groom, Karol Hausman, Brian Ichter, Szymon Jakubczak, Tim Jones, Liyiming Ke, Sergey Levine, Adrian Li-Bell, Mohith Mothukuri, Suraj Nair, Karl Pertsch, Lucy Xiaoyang Shi, James Tanner, Quan Vuong, Anna Walling, Haohuan Wang, Ury Zhilinsky https://physicalintelligence.company/blog/pi0",
+    "zh": "作者单位：Physical Intelligence。作者姓名与项目网址按左侧原文保留。"
+  },
+  {
+    "id": "p1-para3",
+    "page": 1,
+    "source_blocks": [
+      31
+    ],
+    "en": "Fig. 1: Our generalist robot policy uses a pre-trained vision-language model (VLM) backbone, as well as a diverse crossembodiment dataset with a variety of dexterous manipulation tasks. The model is adapted to robot control by adding a separate action expert that produces continuous actions via flow matching, enabling precise and fluent manipulation skills. The model can then be used directly to perform tasks based on a prompt, or fine-tuned on high-quality data to enable complex multi-stage tasks, such as folding multiple articles of laundry or assembling a box.",
+    "zh": "图 1：我们的通用机器人策略使用预训练视觉语言模型（VLM）作为骨干，并使用包含多种灵巧操作任务的多机器人本体数据集。通过增加一个独立的动作专家，模型能够借助流匹配生成连续动作，从而适配机器人控制，实现精确、流畅的操作技能。之后，可以直接通过提示让模型执行任务，也可以用高质量数据进行微调，使其完成更复杂的多阶段任务，例如连续折叠多件衣物或组装纸盒。"
+  },
+  {
+    "id": "p1-para4",
+    "page": 1,
+    "source_blocks": [
+      32,
+      34
+    ],
+    "en": "Abstract—Robot learning holds tremendous promise to unlock the full potential of flexible, general, and dexterous robot systems, as well as to address some of the deepest questions in artificial intelligence. However, bringing robot learning to the level of generality required for effective real-world systems faces major obstacles in terms of data, generalization, and robustness. In this paper, we discuss how generalist robot policies (i.e., robot foundation models) can address these challenges, and how we can design effective generalist robot policies for complex and highly dexterous tasks. We propose a novel flow matching architecture built on top of a pre-trained vision-language model (VLM) to inherit Internet-scale semantic knowledge. We then discuss how this model can be trained on a large and diverse dataset from multiple dexterous robot platforms, including single-arm robots, dual-arm robots, and mobile manipulators. We evaluate our model in terms of its ability to perform tasks via direct prompting, follow language instructions from people and from a high-level VLM policy, and its ability to acquire new skills via fine-tuning. Our results cover a wide variety of tasks, such as laundry folding, table cleaning, and assembling boxes.",
+    "zh": "摘要——机器人学习具有巨大潜力，能够充分发挥灵活、通用、灵巧的机器人系统的能力，也有望帮助回答人工智能中一些最深层的问题。然而，要让机器人学习达到有效真实世界系统所需的通用程度，仍面临数据、泛化和鲁棒性方面的重大障碍。本文讨论通用机器人策略（即机器人基础模型）如何应对这些挑战，以及如何为复杂且高度灵巧的任务设计有效的通用策略。我们提出了一种建立在预训练视觉语言模型之上的新型流匹配架构，以继承互联网规模的语义知识。随后，我们讨论如何使用来自多种灵巧机器人平台的大规模多样化数据集训练该模型；这些平台包括单臂机器人、双臂机器人和移动操作机器人。我们评估模型通过直接提示执行任务、遵循人类及高层 VLM 策略提供的语言指令，以及通过微调掌握新技能的能力。实验覆盖折叠衣物、清理桌面、组装纸盒等多种任务。"
+  },
+  {
+    "id": "p1-para5",
+    "page": 1,
+    "source_blocks": [
+      33
+    ],
+    "en": "Physical Intelligence, San Francisco, California, USA. Correspondance to: research@physicalintelligence.company",
+    "zh": "Physical Intelligence，美国加利福尼亚州旧金山。通讯邮箱：research@physicalintelligence.company。"
+  },
+  {
+    "id": "p2-para1",
+    "page": 2,
+    "source_blocks": [
+      0
+    ],
+    "en": "Fig. 2: π0 controls a mobile manipulator to fold laundry. Our model is pre-trained on diverse data from 7 distinct robot configurations and 68 tasks, and can then either be prompted directly or fine-tuned to complex downstream tasks, as in the case of this laundry folding policy, which fetches laundry from a dryer, packs it into a hamper, brings the hamper to a folding table, and then folds each article of clothing.",
+    "zh": "图 2：π0 控制移动操作机器人折叠衣物。模型在来自 7 种机器人配置、68 项任务的多样化数据上预训练，之后既可直接通过提示使用，也可针对复杂下游任务微调。例如这里的叠衣策略会从烘干机取出衣物、放入洗衣篮、将篮子运到叠衣桌，再逐件折叠衣物。"
+  },
+  {
+    "id": "p2-para2",
+    "page": 2,
+    "source_blocks": [
+      1
+    ],
+    "en": "I. INTRODUCTION",
+    "zh": "I. 引言"
+  },
+  {
+    "id": "p2-para3",
+    "page": 2,
+    "source_blocks": [
+      2,
+      3
+    ],
+    "en": "A human being should be able to change a diaper, plan an invasion, butcher a hog, conn a ship, design a building, write a sonnet, balance accounts, build a wall, set a bone, comfort the dying, take orders, give orders, cooperate, act alone, solve equations, analyze a new problem, pitch manure, program a computer, cook a tasty meal, fight efficiently, die gallantly. Specialization is for insects. Robert A. Heinlein, Time Enough for Love",
+    "zh": "一个人应该能够换尿布、策划进攻、宰猪、驾驶船只、设计建筑、写十四行诗、核对账目、砌墙、接骨、安慰临终者、接受命令、下达命令、与人合作、独立行动、解方程、分析新问题、铲粪、编写程序、做一顿美餐、高效战斗、英勇赴死。专业化是昆虫的事。——罗伯特·A. 海因莱因，《时间足够你爱》。"
+  },
+  {
+    "id": "p2-para4",
+    "page": 2,
+    "source_blocks": [
+      4
+    ],
+    "en": "Artificial intelligence systems come in all shapes and sizes, from highly specialized systems that solve complex problems inaccessible to the human mind, such as predicting the conformation of a protein [21], to systems that can produce lifelike high-resolution images or videos based on textual prompts [40]. However, the axis along which human intelligence most outpaces machine intelligence is versatility: the ability to solve diverse tasks situated in varied physical environments, while responding intelligently to environmental constraints, language commands, and unexpected perturbations. Perhaps the most tangible progress toward this kind of versatility in AI can be seen in large language- and visionlanguage models [1, 48]: systems that are pre-trained on large and very diverse corpora of images and text from the web, and then fine-tuned (“aligned”) using more carefully curated datasets meant to induce the desired pattern of behavior and responsiveness. While such models have been shown to exhibit broad instruction-following and problem-solving abilities [53, 27], they are not truly situated in a physical world the way that people are, and their understanding of physical interaction is based entirely on abstract descriptions. If such methods are to make tangible progress toward AI systems that exhibit the kind of physically situated versatility that people possess, we will need to train them on physically situated data — that is, data from embodied robot agents.",
+    "zh": "人工智能系统形态各异：有的高度专门化，能解决人类思维难以处理的复杂问题，例如预测蛋白质构象 [21]；有的则能依据文本提示生成逼真的高分辨率图像或视频 [40]。然而，人类智能最显著领先于机器智能的维度是多面性：能在不同物理环境中完成各种任务，同时对环境约束、语言命令和意外扰动做出合理响应。人工智能在这种多面性上最切实的进展，或许体现在大型语言模型和视觉语言模型 [1,48] 上：这些系统先在来自互联网的大规模、多样化图文语料上预训练，再使用更精心筛选的数据集微调（“对齐”），以诱导期望的行为和响应方式。尽管它们已表现出广泛的指令遵循和问题求解能力 [53,27]，却并不像人一样真正处在物理世界中；它们对物理交互的理解完全基于抽象描述。若想用这些方法取得实质进展，构建具有人类那种立足物理世界的多面性的 AI，就需要使用真实物理交互数据训练它们，也就是来自具身机器人智能体的数据。"
+  },
+  {
+    "id": "p2-para5",
+    "page": 2,
+    "source_blocks": [
+      5
+    ],
+    "en": "Flexible and general-purpose models that can be tasked to perform a variety of robot behaviors have tremendous practical ramifications, but they may also offer solutions to some of the toughest challenges facing robot learning today, such as availability of data, generalization, and robustness. In natural language [1] and computer vision [39], general-purpose foundation models that are pre-trained on diverse multi-task data tend to outperform narrowly tailored and specialized",
+    "zh": "能够被指派执行多种机器人行为的灵活通用模型，具有重大的实际意义，也可能帮助解决机器人学习当前最困难的一些问题，包括数据可得性、泛化和鲁棒性。在自然语言 [1] 和计算机视觉 [39] 中，在多样化多任务数据上预训练的通用基础模型，往往优于为狭窄用途定制的专门化……【续右栏】"
+  },
+  {
+    "id": "p2-para6",
+    "page": 2,
+    "source_blocks": [
+      6
+    ],
+    "en": "solutions. For example, if the goal is to recognize birds in photographs, it is likely more expedient to pre-train on many different image-language associations and then fine-tune or prompt for the bird recognition task, than it is to train on only bird recognition data. Similarly, we may find that for effective specialized robot systems, it is more effective to first pre-train on highly diverse robot data, and then fine-tune or prompt for the desired task. This can resolve the data scarcity challenge, because many more sources of data are available to a generalist model — including data from other tasks, other robots, or even non-robot sources — and it may resolve robustness and generalization challenges, because the diverse data exhibits a greater coverage of observations and actions, providing a variety of scenes, corrections, and recovery behaviors that might not be present in more narrow specialized data. Thus, adopting a large-scale pre-training approach to robot learning has the potential to address many of the field’s challenges and make practical learning-enabled robots a reality, while at the same time furthering our understanding of the deepest problems in artificial intelligence.",
+    "zh": "【承接左栏】……解决方案。例如，若目标是识别照片里的鸟，通常先在大量不同的图文关联上预训练，再针对鸟类识别进行微调或提示，比只在鸟类识别数据上训练更合适。同理，为了获得有效的专用机器人系统，先在高度多样化的机器人数据上预训练，再针对目标任务微调或提示，可能更有效。通用模型能利用更多来源，包括其他任务、其他机器人乃至非机器人数据，因此可以缓解数据稀缺；多样化数据覆盖更广的观察和动作，提供狭窄专用数据中未必出现的场景、纠正和恢复行为，也可能改善鲁棒性与泛化。因此，将大规模预训练引入机器人学习，有望应对该领域的许多挑战，使实用的学习型机器人变成现实，同时加深我们对人工智能深层问题的理解。"
+  },
+  {
+    "id": "p2-para7",
+    "page": 2,
+    "source_blocks": [
+      7
+    ],
+    "en": "However, developing such generalist robot policies — i.e., robot foundation models — involves a number of major challenges. First, any such research must be done at a very large scale, because the full benefits of large-scale pre-training are often not present at smaller scales [54]. Second, it requires developing the right model architectures that can effectively make use of diverse data sources, while at the same time being able to represent the intricate and subtle behaviors necessary to interact with complex physical scenes. Third, it requires the right training recipe. This is perhaps the most important ingredient, as much of the recent progress with large models in NLP and computer vision has relied heavily on delicate strategies for curating pre-training and post-training data [35].",
+    "zh": "不过，开发这样的通用机器人策略，即机器人基础模型，仍有若干重大挑战。第一，研究必须达到很大规模，因为在较小规模上通常无法充分体现大规模预训练的收益 [54]。第二，需要合适的模型架构，既有效利用多样数据，又能表示与复杂物理场景交互所必需的精细微妙行为。第三，需要正确的训练方案。这可能是最重要的组成部分，因为 NLP 与计算机视觉中大型模型的近期进展，很大程度依赖于精细组织预训练和后训练数据的策略 [35]。"
+  },
+  {
+    "id": "p2-para8",
+    "page": 2,
+    "source_blocks": [
+      8
+    ],
+    "en": "In this paper, we present a prototype model and learning framework, which we call π0, that illustrates how each of these three bottlenecks could be tackled. We illustrate our model and system in Figure 1. To incorporate diverse data sources, we begin by utilizing a pre-trained vision-language model (VLM) to import Internet-scale experience. By basing our model on a VLM, we inherit the general knowledge, semantic reasoning, and problem-solving abilities of languageand vision-language models. We then further train our model to incorporate robot actions, turning it into a vision-language-",
+    "zh": "本文提出一个名为 π0 的原型模型及学习框架，说明如何应对这三个瓶颈。图 1 展示了模型和系统。为了纳入多样化数据来源，我们先使用预训练视觉语言模型（VLM），引入互联网规模的经验。以 VLM 为基础，使模型能够继承语言模型和视觉语言模型的一般知识、语义推理与问题求解能力。接着，我们进一步训练模型，使其能够处理机器人动作，将其变成视觉—语言—……【续下一页】"
+  },
+  {
+    "id": "p3-para1",
+    "page": 3,
+    "source_blocks": [
+      0
+    ],
+    "en": "action (VLA) model [7]. In order to make it feasible to utilize a variety of diverse robot data sources, we employ crossembodiment training [10], where data from many robot types is combined into the same model. These different robot types have different configuration spaces and action representations, including single and dual-arm systems, as well as mobile manipulators. Additionally, in order to make it possible to perform highly dexterous and intricate physical tasks, we use an action chunking architecture [57] with flow matching (a variant of diffusion) to represent complex continuous action distributions [28, 32]. This enables our model to control robots at frequencies of up to 50 Hz for dexterous tasks such as laundry folding (see Figure 1). To combine flow matching with VLMs, we use a novel action expert that augments the standard VLM with flow-based outputs.",
+    "zh": "【承接上一页】……动作（VLA）模型 [7]。为了利用多样化的机器人数据，我们采用跨本体训练 [10]，将多种机器人类型的数据合并到同一个模型中。这些机器人包括单臂、双臂和移动操作系统，具有不同的构型空间和动作表示。为了完成高度灵巧而复杂的物理任务，我们采用动作分块架构 [57]，结合流匹配（一种与扩散相关的变体）来表示复杂的连续动作分布 [28,32]。这让模型能够以最高 50 Hz 的频率控制机器人，执行叠衣等灵巧任务（见图 1）。为将流匹配与 VLM 结合，我们使用一种新的动作专家，为标准 VLM 增加基于流的输出。"
+  },
+  {
+    "id": "p3-para2",
+    "page": 3,
+    "source_blocks": [
+      1
+    ],
+    "en": "As with language models, the architecture of our model is only part of our method. In order to flexibly and robustly perform complex tasks, we need the right training recipe. Our recipe mirrors the pre-training/post-training separation commonly seen in exascale language- and image-language models [1, 48], where the model is first pre-trained on a very large and diverse corpus, and then fine-tuned on more narrow and more carefully curated data to induce the desired pattern of behavior — in our case, dexterity, efficiency, and robustness. Intuitively, training only on high-quality data does not teach the model how to recover from mistakes, since mistakes are rarely seen in such data. Training on only lower-quality pretraining data does not teach the model to act efficiently and robustly. Combining both provides the desired behavior: the model attempts insofar as possible to act in a manner similar to the high-quality data, but still has a repertoire of recoveries and corrections that it can deploy in the case of a mistake.",
+    "zh": "与语言模型一样，模型架构只是我们方法的一部分。要灵活且稳健地完成复杂任务，还需要合适的训练方案。我们的方案借鉴超大规模语言模型与图文模型中常见的预训练／后训练分离方式 [1,48]：先在大规模、多样化语料上预训练，再在范围较窄、筛选更精细的数据上微调，以诱导期望行为；在这里就是灵巧性、效率和鲁棒性。直观地说，只在高质量数据上训练，模型学不到如何从错误中恢复，因为这类数据很少包含错误；只在较低质量的预训练数据上训练，又不能教会模型高效而稳健地行动。两者结合后，模型会尽可能表现得像高质量示范，同时仍保有一套可在出错时使用的恢复与纠正行为。"
+  },
+  {
+    "id": "p3-para3",
+    "page": 3,
+    "source_blocks": [
+      2
+    ],
+    "en": "The contributions of our work consist of a novel generalist robot policy architecture based on VLM pre-training and flow matching, and an empirical investigation of pre-training/posttraining recipes for such robot foundation models. We evaluate our model out of the box with language commands, with fine-tuning to downstream tasks, and in combination with a high-level semantic policy that outputs intermediate language commands to perform complex and temporally extended tasks. While our model and system make use of a variety of ideas presented in recent work, the combination of ingredients is novel, and the empirical evaluation demonstrates a level of dexterity and generality that goes significantly beyond previously demonstrated robot foundation models. We evaluate our approach by pre-training on over 10,000 hours of robot data, and fine-tuning to a variety of dexterous tasks, including laundry folding (see Figure 2), clearing a table, putting dishes in a microwave, stacking eggs into a carton, assembling a box, and bagging groceries.",
+    "zh": "本工作的贡献包括：基于 VLM 预训练和流匹配的新型通用机器人策略架构，以及对机器人基础模型预训练／后训练方案的实证研究。我们评估模型直接接受语言命令的开箱即用能力、针对下游任务微调的能力，以及与高层语义策略结合完成复杂长时任务的能力；高层策略会输出中间语言指令。虽然模型和系统吸收了近期工作的多种思想，但其组合方式是新的；实证评估展示的灵巧性与通用性显著超越了此前展示的机器人基础模型。我们使用超过 10,000 小时的机器人数据预训练，并针对多种灵巧任务微调，包括叠衣（图 2）、清桌、把餐具放进微波炉、把鸡蛋装进蛋盒、组装纸盒和杂货装袋。"
+  },
+  {
+    "id": "p3-para4",
+    "page": 3,
+    "source_blocks": [
+      3
+    ],
+    "en": "II. RELATED WORK",
+    "zh": "II. 相关工作"
+  },
+  {
+    "id": "p3-para5",
+    "page": 3,
+    "source_blocks": [
+      4,
+      5
+    ],
+    "en": "Our work builds on recently proposed methods in largescale robot learning, as well as multimodal language models. Our work is most closely related to recently proposed visionlanguage action (VLA) models, which use pre-trained VLMs that are fine-tuned for robot control [7, 24, 55]. Such models employ autoregressive discretization to represent actions in a manner analogous to text tokens. In contrast, our model employs a novel design that fine-tunes a VLM to produce actions via flow matching [32, 28], a variant of diffusion [20, 46]. This allows us to handle high-frequency action chunks [57] (up to 50 Hz) and highly dexterous tasks, which we show pose a major challenge for prior autoregressive VLAs [7]. This resembles a number of recent works on diffusion models for action generation [9, 60]. In contrast to these works, our model uses a pre-trained VLM backbone [5]. Our contribution is also fundamentally integrative, focusing on a framework for robot foundation models, including not only the model architecture itself but also a pre-training recipe, pre-training and posttraining phases, and a range of real-world experiments.",
+    "zh": "我们的工作建立在近期大规模机器人学习和多模态语言模型方法之上，最接近的是将预训练 VLM 微调用于机器人控制的 VLA 模型 [7,24,55]。这些模型采用自回归离散化，像表示文本 token 一样表示动作。与之相比，我们采用新的设计，通过流匹配 [32,28]（一种与扩散 [20,46] 相关的变体）微调 VLM，使其产生动作。这使我们能够处理高频动作块 [57]（最高 50 Hz）和高度灵巧的任务；我们表明，这对此前的自回归 VLA [7] 是重大挑战。这与近期利用扩散生成动作的一些工作 [9,60] 相似，但我们的模型使用预训练 VLM 骨干 [5]。我们的贡献也具有整合性质：关注机器人基础模型的整体框架，不仅包括架构，还包括训练方案、预训练与后训练阶段，以及一系列真实机器人实验。"
+  },
+  {
+    "id": "p3-para6",
+    "page": 3,
+    "source_blocks": [
+      6
+    ],
+    "en": "Outside of robot control, many models have been proposed that combine pre-trained language models with diffusion [40, 41, 14], including models that specifically hybridize diffusion and autoregressive large language models [19, 29, 59]. Such models are typically concerned with image generation, but our action generation model builds on a number of previously proposed concepts. Like Zhou et al. [59], we train our model via a diffusion-style (flow matching) loss applied on individual sequence elements, in lieu of the standard cross-entropy loss for decoder-only transformers. Like Liu et al. [29], we use a separate set of weights for the tokens corresponding to diffusion. Incorporating these concepts into a VLA model, we introduce what to our knowledge is the first flow matching VLA that produces high-frequency action chunks for dexterous control.",
+    "zh": "在机器人控制之外，已有许多模型将预训练语言模型与扩散结合 [40,41,14]，也有专门混合扩散和自回归大语言模型的工作 [19,29,59]。这些模型通常用于图像生成，但我们的动作生成模型借鉴了其中一些概念。与 Zhou 等 [59] 一样，我们使用施加于各序列元素的扩散式（流匹配）损失训练模型，而不是仅解码器 Transformer 的标准交叉熵损失。与 Liu 等 [29] 一样，我们对对应扩散的 token 使用独立权重。将这些概念纳入 VLA 后，据我们所知，我们首次提出了能够为灵巧控制生成高频动作块的流匹配 VLA。"
+  },
+  {
+    "id": "p3-para7",
+    "page": 3,
+    "source_blocks": [
+      7
+    ],
+    "en": "Our work also builds on a rich history of prior works on large-scale robot learning. Early work in this area often utilized self-supervised or autonomous data collection [26, 22, 8], providing a tractable data source for simple tasks such as grasping [18, 37] or pushing [56], but without the complexity of more dexterous behaviors. More recently, a number of highquality datasets have been collected for robot control that enable broad generalization [23, 10, 52, 33, 34, 43, 13, 6], but typically for simpler tasks that consist of object relocation and rudimentary furniture manipulation (e.g., drawer opening) [31, 15]. More dexterous tasks have been studied at a smaller scale, typically with 10s or 100s of training trajectories [57], equivalent to 10 or less hours. Since one of our aims is to study complex and dexterous behaviors, we utilize a much larger dataset, with about 10,000 hours of demonstrations, complemented by the open-source OXE dataset [10]. To our knowledge, this represents by far the largest robot learning experiment in terms of the amount of robot data. At this scale, we show that a more sophisticated pre-training/post-training recipe is highly effective — analogously to the recipes used for large language models, a pre-training phase endows our model with a broad base of knowledge, which is then refined in a post-training phase with higher-quality curated data to achieve the desired behavior.",
+    "zh": "我们的工作也建立在大规模机器人学习的丰富研究历史之上。早期研究常采用自监督或自主数据采集 [26,22,8]，为抓取 [18,37]、推动 [56] 等简单任务提供可行数据来源，但未涉及更灵巧行为的复杂性。近期，若干高质量控制数据集支持了更广泛的泛化 [23,10,52,33,34,43,13,6]，但通常仍是物体搬移和基础家具操作（如开抽屉）等较简单任务 [31,15]。更灵巧的任务多在较小规模上研究，通常为数十或数百条训练轨迹 [57]，相当于不超过 10 小时。由于我们的目标之一是研究复杂灵巧行为，因此采用约 10,000 小时示范的大得多的数据集，并以开源 OXE 数据 [10] 补充。据我们所知，以机器人数据量衡量，这是迄今最大规模的机器人学习实验。在这个规模上，我们表明更精细的预训练／后训练方案非常有效：类似大语言模型，预训练赋予广泛知识基础，后训练再用高质量筛选数据加以完善，获得期望行为。"
+  },
+  {
+    "id": "p3-para8",
+    "page": 3,
+    "source_blocks": [
+      8
+    ],
+    "en": "The complexity of the tasks we illustrate goes significantly beyond prior work. While recent work has illustrated a number",
+    "zh": "我们展示的任务复杂程度显著超出此前工作。虽然近期研究已展示若干更复杂、灵巧的……【续下一页】"
+  },
+  {
+    "id": "p4-para1",
+    "page": 4,
+    "source_blocks": [
+      14
+    ],
+    "en": "Fig. 3: Overview of our framework. We start with a pre-training mixture, which consists of both our own dexterous manipulation datasets and open-source data. We use this mixture to train our flow matching VLA model, which consists of a larger VLM backbone and a smaller action expert for processing robot states and actions. The VLM backbone weights are initialized from PaliGemma [5], providing representations learned from large-scale Internet pre-training. The resulting π0 model can be used to control multiple robot embodiments with differing action spaces to accomplish a wide variety of tasks.",
+    "zh": "图 3：框架概览。我们先构建预训练混合数据，其中既包含自己采集的灵巧操作数据，也包含开源数据。使用这些数据训练流匹配 VLA：模型由较大的 VLM 骨干和较小的动作专家组成，后者处理机器人状态与动作。VLM 骨干由 PaliGemma [5] 初始化，提供从大规模互联网预训练中学到的表示。得到的 π0 可控制动作空间不同的多种机器人本体，完成多样任务。"
+  },
+  {
+    "id": "p4-para2",
+    "page": 4,
+    "source_blocks": [
+      15
+    ],
+    "en": "of more complex and dexterous behaviors, such as tying shoelaces [58] or cooking shrimp [17], we show that our framework can learn very long tasks, sometimes tens of minutes in length, for behaviors that combine both physical dexterity and combinatorial complexity. For example, our laundry folding task requires the robot to manipulate a variety of clothing items that can start in any configuration, and fold multiple items in sequence. Our table bussing task requires discerning the class of novel objects (trash or dishes). We show that a single cross-embodiment model can be used as the base model for these tasks. To our knowledge, our work demonstrates the longest dexterous tasks in the end-to-end robot learning literature.",
+    "zh": "【承接上一页】……行为，例如系鞋带 [58] 或烹饪虾 [17]，而我们展示的框架能够学会持续很久、有时长达数十分钟的任务，同时涉及物理灵巧性和组合复杂性。例如叠衣任务要求操作从任意状态开始的不同衣物，并连续折叠多件；清桌任务需要判断新物体属于垃圾还是餐具。我们表明，同一个跨本体模型可以作为这些任务的基础模型。据我们所知，本工作展示了端到端机器人学习文献中持续时间最长的灵巧操作任务。"
+  },
+  {
+    "id": "p4-para3",
+    "page": 4,
+    "source_blocks": [
+      16
+    ],
+    "en": "III. OVERVIEW",
+    "zh": "III. 总览"
+  },
+  {
+    "id": "p4-para4",
+    "page": 4,
+    "source_blocks": [
+      17
+    ],
+    "en": "We provide an outline of our model and training procedure in Figure 3. In our training framework, we first assemble a pre-training mixture consisting of a weighted combination of our own dexterous manipulation datasets (Section V-C), collected on 7 different robot configurations for 68 different tasks, and the entire OXE dataset [10], which contains data from 22 robots. The pre-training phase (Section V-A) also uses diverse language labels, combining task names and segment annotations (fine-grained labels for sub-trajectories, typically about 2 seconds in length). The purpose of the pre-training phase is to train a base model that exhibits broad capabilities and generalization, but is not necessarily specialized for high performance on any one task. This base model can follow language commands and perform a variety of tasks at rudimentary proficiency. For complex and dexterous tasks, we then employ a post-training procedure (Section V-A), which uses high-quality curated data to adapt the model to specific downstream tasks. We study both efficient post-training with small to moderate amounts of data, and high-quality posttraining with larger datasets for complex tasks such as laundry folding and mobile manipulation.",
+    "zh": "图 3 概述模型与训练流程。首先构建预训练混合数据：加权组合来自 7 种机器人配置、68 项任务的自有灵巧操作数据（第 V-C 节），以及包含 22 种机器人数据的 OXE 数据集 [10]。预训练阶段（第 V-A 节）也采用多样语言标签，将任务名称与片段标注结合；后者是针对子轨迹的细粒度标签，通常每段约 2 秒。预训练旨在获得能力广泛、具有泛化性的基础模型，而不是专门优化某一任务的高性能。这个基础模型能够遵循语言命令，以初步熟练程度执行多种任务。对于复杂灵巧任务，再采用后训练流程（第 V-A 节），用高质量筛选数据适配具体下游任务。我们既研究少量到中等数据量下的高效后训练，也研究用更大数据集完成叠衣、移动操作等复杂任务的高质量后训练。"
+  },
+  {
+    "id": "p4-para5",
+    "page": 4,
+    "source_blocks": [
+      18
+    ],
+    "en": "Our model, which we describe in Section IV, is based on the PaliGemma vision-language model [5], which we then further train with our data mixture. To turn the base PaliGemma VLM into π0, we add action outputs that use flow matching [32, 28] to generate continuous action distributions. We describe this design in detail in the following section. Note that we use PaliGemma for convenience and because of its comparatively small size (which is useful for real-time control), but our framework is compatible with any base pre-trained VLM.",
+    "zh": "第 IV 节描述的模型基于 PaliGemma 视觉语言模型 [5]，随后在我们的混合数据上进一步训练。为了将基础 PaliGemma VLM 转变为 π0，我们增加动作输出，借助流匹配 [32,28] 生成连续动作分布。下一节详细介绍这一设计。选择 PaliGemma 是出于便利及其相对较小的规模（有利于实时控制），但框架兼容任意基础预训练 VLM。"
+  },
+  {
+    "id": "p4-para6",
+    "page": 4,
+    "source_blocks": [
+      19
+    ],
+    "en": "IV. THE π0 MODEL",
+    "zh": "IV. π0 模型"
+  },
+  {
+    "id": "p4-para7",
+    "page": 4,
+    "source_blocks": [
+      20,
+      21
+    ],
+    "en": "The π0 model, illustrated in Figure 3, consists primarily of a language model transformer backbone. Following the standard late fusion VLM recipe [3, 11, 30], image encoders embed the robot’s image observations into the same embedding space as language tokens. We further augment this backbone with robotics-specific inputs and outputs — namely, proprioceptive state and robot actions. π0 uses conditional flow matching [28, 32] to model the continuous distribution of actions. Flow matching provides our model with high precision and multimodal modeling capability, making it especially well suited to high-frequency dexterous tasks. Our architecture is inspired by Transfusion [59], which trains a single transformer using multiple objectives, with tokens1 corresponding to continuous outputs supervised via a flow matching loss and tokens corresponding to discrete outputs supervised via a cross-entropy loss. Building on Transfusion, we additionally found that using a separate set of weights for the robotics-specific (action and state) tokens led to an improvement in performance. This design is analogous to a mixture of experts [45, 25, 12, 16] with two mixture elements, where the first element is used for image and text inputs, and",
+    "zh": "图 3 所示的 π0 主要由语言模型 Transformer 骨干构成。沿用标准的后期融合 VLM 方案 [3,11,30]，图像编码器将机器人图像观察嵌入到与语言 token 相同的表示空间。我们进一步加入机器人专用输入和输出，即本体感知状态与机器人动作。π0 使用条件流匹配 [28,32] 对连续动作分布建模，提供高精度和多模态分布建模能力，尤其适合高频灵巧任务。架构受 Transfusion [59] 启发：在一个 Transformer 上使用多个目标，对应连续输出的 token 用流匹配损失监督，对应离散输出的 token 用交叉熵损失监督。在此基础上，我们发现对机器人专用的动作与状态 token 使用另一套权重能够改善表现。这种设计类似含两个专家的混合专家模型 [45,25,12,16]：第一套用于图像和文本输入，而……【续下一页】"
+  },
+  {
+    "id": "p4-para8",
+    "page": 4,
+    "source_blocks": [
+      22
+    ],
+    "en": "1In this paper, we use the word “token” to refer to an input/output slot along the sequence dimension, whether the slot corresponds to a discrete variable (e.g., a language token) or a continuous variable (e.g., an image patch or a robot action).",
+    "zh": "脚注 1：本文中的“token”指序列维度上的输入／输出位置，不论该位置对应离散变量（例如语言 token），还是连续变量（例如图像块或机器人动作）。"
+  },
+  {
+    "id": "p5-para1",
+    "page": 5,
+    "source_blocks": [
+      0
+    ],
+    "en": "the second is used for robotics-specific inputs and outputs. We refer to the second set of weights as the action expert.",
+    "zh": "【承接上一页】……第二套用于机器人专用输入与输出。我们将第二套权重称为动作专家。"
+  },
+  {
+    "id": "p5-para2",
+    "page": 5,
+    "source_blocks": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "en": "Formally, we want to model the data distribution p(At|ot), where At = [at, at+1, ..., at+H−1] corresponds to an action chunk of future actions (we use H = 50 for our tasks), and ot is an observation. The observation consists of multiple RGB images, a language command, and the robot’s proprioceptive state, such that ot = [I1 t, ..., In t , ℓt, qt], where Ii t is ith image (with 2 or 3 images per robot), ℓt is a sequence of language tokens, and qt is a vector of joint angles. The images Ii t and state qt are encoded via corresponding encoders and then projected via a linear projection layer into the same embedding space as the language tokens.",
+    "zh": "形式上，我们要对数据分布 p(Aₜ | oₜ) 建模。Aₜ = [aₜ, aₜ₊₁, …, aₜ₊H₋₁] 表示未来动作组成的动作块；在本文任务中 H = 50。oₜ 是观察，由多张 RGB 图像、一条语言命令和机器人的本体感知状态组成，即 oₜ = [Iₜ¹, …, Iₜⁿ, ℓₜ, qₜ]。Iₜⁱ 是第 i 张图像，每个机器人使用 2 或 3 张图像；ℓₜ 是语言 token 序列；qₜ 是关节角向量。图像和状态分别经对应编码器编码，再通过线性投影映射到与语言 token 相同的嵌入空间。"
+  },
+  {
+    "id": "p5-para3",
+    "page": 5,
+    "source_blocks": [
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "en": "For each action at′ in the action chunk At, we have a corresponding action token that we feed through the action expert. During training, we supervise these action tokens using a conditional flow matching loss [28, 32], Lτ(θ) = Ep(At|ot),q(Aτ t |At)||vθ(Aτ t , ot) −u(Aτ t |At)||2,",
+    "zh": "动作块 Aₜ 中的每个动作 aₜ′ 都对应一个动作 token，并通过动作专家处理。训练时，使用条件流匹配损失 [28,32] 监督这些 token：损失是模型预测向量场 vθ 与目标向量场 u 之间的平方差期望。公式保留在左侧原文中，θ 表示模型参数。"
+  },
+  {
+    "id": "p5-para4",
+    "page": 5,
+    "source_blocks": [
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "en": "where subscripts denote robot timesteps and superscripts denote flow matching timesteps, with τ ∈[0, 1]. Recent work in high-resolution image [14] and video [38] synthesis has shown that flow matching can achieve strong empirical performance when combined with a simple linearGaussian (or optimal transport) probability path [28], given by q(Aτ t |At) = N(τAt, (1 −τ)I). In practice, the network is trained by sampling random noise ϵ ∼N(0, I), computing the “noisy actions” Aτ t = τAt + (1 −τ)ϵ, and then training the network outputs vθ(Aτ t , ot) to match the denoising vector field u(Aτ t |At) = At −ϵ. The action expert uses a full bidirectional attention mask, so that all action tokens attend to each other. During training, we sample the flow matching timestep τ from a beta distribution that emphasizes lower (noisier) timesteps. See Appendix B for more details.",
+    "zh": "下标表示机器人时间步，上标表示流匹配时间步，τ ∈ [0,1]。近期高分辨率图像 [14] 与视频生成 [38] 的研究表明，流匹配结合简单的线性高斯（或最优传输）概率路径 [28] 可取得较好实证表现；论文给出的路径公式见左侧。实际训练时，采样随机噪声 ε ∼ N(0,I)，计算带噪动作 Aₜ^τ = τAₜ + (1−τ)ε，再训练网络输出 vθ(Aₜ^τ,oₜ) 匹配去噪向量场 u = Aₜ−ε。动作专家采用完全双向注意力掩码，因此所有动作 token 都可相互关注。训练时从强调较小 τ（更高噪声）区域的 Beta 分布采样 τ。更多细节见附录 B。"
+  },
+  {
+    "id": "p5-para5",
+    "page": 5,
+    "source_blocks": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22
+    ],
+    "en": "At inference time, we generate actions by integrating the learned vector field from τ = 0 to τ = 1, starting with random noise A0 t ∼N(0, I). We use the forward Euler integration rule: Aτ+δ t = Aτ t + δvθ(Aτ t , ot), where δ is the integration step size. We use 10 integration steps (corresponding to δ = 0.1) in our experiments. Note that inference can be implemented efficiently by caching the attention keys and values for the prefix ot and only recomputing the suffix corresponding to the action tokens for each integration step. We provide more details regarding the inference procedure, including the inference time for each part of the model, in Appendix D.",
+    "zh": "推理时，从随机噪声 Aₜ⁰ ∼ N(0,I) 出发，将学到的向量场从 τ=0 积分至 τ=1，生成动作。使用前向欧拉积分：Aₜ^(τ+δ) = Aₜ^τ + δ·vθ(Aₜ^τ,oₜ)，其中 δ 为积分步长。实验采用 10 个积分步骤，即 δ=0.1。推理可以通过缓存前缀 oₜ 的注意力键和值来高效实现，每个积分步骤只重新计算对应动作 token 的后缀。附录 D 给出推理过程及模型各部分耗时的更多细节。"
+  },
+  {
+    "id": "p5-para6",
+    "page": 5,
+    "source_blocks": [
+      23
+    ],
+    "en": "While in principle our model can be initialized from scratch or fine-tuned from any VLM backbone, in practice we use PaliGemma [5] as our base model. PaliGemma is an opensource 3 billion parameter VLM that offers a convenient tradeoff between size and performance. We add 300M parameters for the action expert (which is initialized from scratch) for a total of 3.3 billion parameters. We provide a full description of the model architecture in Appendix B.",
+    "zh": "原则上，模型可从随机初始化开始训练，也可由任意 VLM 骨干微调而来；实际采用 PaliGemma [5]。它是拥有 30 亿参数的开源 VLM，在规模与性能之间提供了便利的折中。我们为从随机初始化开始训练的动作专家增加 3 亿参数，使模型总参数量达到 33 亿。完整架构见附录 B。"
+  },
+  {
+    "id": "p5-para7",
+    "page": 5,
+    "source_blocks": [
+      24
+    ],
+    "en": "Non-VLM baseline model. In addition to our main VLA model, we also trained a similar baseline model that did not use a VLM initialization for ablation experiments. This model, which we refer to as π0-small, has 470M parameters, does not use VLM initialization, and has a number of small differences that we found to be helpful for training on our data without VLM initialization, which are summarized in Appendix C. This model is used in our comparisons to evaluate the benefits of incorporating VLM pertaining.",
+    "zh": "非 VLM 基线模型。除主要 VLA 外，我们还训练了一个不使用 VLM 初始化的相似基线，用于消融实验。该模型称为 π0-small，包含 4.7 亿参数，不采用 VLM 初始化，并有一些适合在本数据上从头训练的小改动，详见附录 C。通过该模型的比较，评估引入 VLM 预训练的收益。"
+  },
+  {
+    "id": "p5-para8",
+    "page": 5,
+    "source_blocks": [
+      25
+    ],
+    "en": "V. DATA COLLECTION AND TRAINING RECIPE",
+    "zh": "V. 数据采集与训练方案"
+  },
+  {
+    "id": "p5-para9",
+    "page": 5,
+    "source_blocks": [
+      26
+    ],
+    "en": "Broadly capable robot foundation models require not only an expressive and powerful architecture, but also the right dataset and, more importantly, the right training recipe. In the same way that LLM training is typically divided into pre-training and post-training phases, we employ a multistage training procedure for our model. The goal of the pretraining phase is to expose the model to a diverse range of tasks so that it can acquire broadly applicable and general physical capabilities, while the goal of the post-training phase is to provide the model with the ability to skillfully and fluently execute the desired downstream task. Because of this, the requirements for the pre-training and post-training datasets are distinct: the pre-training dataset should cover as many tasks as possible, and within each of those tasks should cover a diversity of behaviors. The post-training dataset should instead cover behaviors that are conducive to effective task execution, which should exhibit a consistent and fluent strategy. Intuitively, the diverse (but lower quality) pre-training data allows the model to recover from mistakes and handle highly varied situations, which might not otherwise occur in the high-quality post-training data, while the post-training data teaches the model to perform the task well.",
+    "zh": "能力广泛的机器人基础模型不仅需要表达力强的架构，还需要合适的数据集，更重要的是合适的训练方案。类似大语言模型通常划分为预训练与后训练，我们采用多阶段训练。预训练让模型接触多样任务，学习广泛适用的一般物理能力；后训练则使其熟练流畅地执行所需的下游任务。因此两个阶段的数据要求不同：预训练应尽可能覆盖更多任务，并在每项任务中覆盖多样行为；后训练应覆盖有利于有效完成任务、策略一致且流畅的行为。直观上，多样但质量相对较低的预训练数据帮助模型从错误中恢复，并处理高质量后训练数据中未必出现的复杂变化；后训练数据则教模型把任务做好。"
+  },
+  {
+    "id": "p5-para10",
+    "page": 5,
+    "source_blocks": [
+      27
+    ],
+    "en": "A. Pre-training and post-training",
+    "zh": "A. 预训练与后训练"
+  },
+  {
+    "id": "p5-para11",
+    "page": 5,
+    "source_blocks": [
+      28
+    ],
+    "en": "Fig. 4: Overview of our dataset: The pre-training mixture consists of a subset of OXE [10] and the π dataset. We use a subset of OXE, which we refer to as OXE Magic Soup [24]. The right figure illustrates the weight of the different datasets in the pre-training mixture. The left figure illustrates their relative sizes as measured by the number of steps.",
+    "zh": "图 4：数据集概览。预训练混合数据由 OXE 的一个子集 [10] 和 π 数据集组成。我们将采用的 OXE 子集称为 OXE Magic Soup [24]。右图展示不同数据集在混合采样中的权重；左图按时间步数量展示各自的相对规模。"
+  },
+  {
+    "id": "p5-para12",
+    "page": 5,
+    "source_blocks": [
+      29
+    ],
+    "en": "We provide an overview of our pre-training mixture in Figure 4. Since each training example corresponds to a timestep — i.e., a tuple (ot, At), — we will quantify data in terms of timesteps in this discussion. 9.1% of the training mixture consists of open-source datasets, including OXE [10], Bridge",
+    "zh": "图 4 概述预训练混合数据。由于每个训练样本对应一个时间步，即二元组 (oₜ,Aₜ)，这里用时间步数衡量数据量。混合数据中 9.1% 来自开源数据，包括 OXE [10]、Bridge……【续下一页】"
+  },
+  {
+    "id": "p6-para1",
+    "page": 6,
+    "source_blocks": [
+      0
+    ],
+    "en": "v2 [52], and DROID [23]. The robots and tasks in these datasets typically have one or two cameras and use lowfrequency control, between 2 and 10 Hz. However, these datasets cover a wide range of objects and environments. To learn dexterous and more complex tasks, we also use 903M timesteps of data from our own datasets, where 106M steps are from single-arm robots and 797M are from dual-arm robots. This data has 68 tasks, where each task is composed of complex behaviors — e.g., the “bussing” task involves putting a wide range of different dishes, cups, and utensils into a bussing bin, and a wide array of trash items into the garbage. Note that this definition of task is significantly different from prior work, which typically uses any combination of noun and verb (e.g., “pick up the cup” vs. “pick up the plate”) to constitute a distinct task. Therefore, the actual range of behaviors in our dataset is significantly broader than this number of “tasks” would imply. We discuss the specific robots and tasks in our dataset in more detail in Section V-C.",
+    "zh": "【承接上一页】……v2 [52] 和 DROID [23]。这些数据中的机器人和任务通常使用一到两台相机，并以 2～10 Hz 的低频控制，但覆盖了广泛的物体和环境。为学习更灵巧复杂的任务，我们还使用自有数据集中的 9.03 亿个时间步，其中单臂机器人贡献 1.06 亿步，双臂机器人贡献 7.97 亿步。这些数据包含 68 项任务，每项任务都由复杂行为组成。例如“清桌”涉及把各种盘子、杯子、餐具放进收纳箱，并把各种垃圾放进垃圾桶。这里的任务定义明显不同于许多既有工作；后者通常把任何名词与动词组合（如“拿起杯子”与“拿起盘子”）视为不同任务。因此实际行为范围远比“68 项任务”这个数字暗示的更广。第 V-C 节详述机器人与任务。"
+  },
+  {
+    "id": "p6-para2",
+    "page": 6,
+    "source_blocks": [
+      1
+    ],
+    "en": "Since the datasets are somewhat imbalanced in size (e.g., the more difficult laundry folding tasks are overrepresented), we weight each task-robot combination by n0.43, where n is the number of samples for that combination, such that over-represented combinations are down-weighted. The configuration vector qt and action vectors at always have the dimensionality of the largest robot in the dataset (18 in our case, to accommodate two 6-DoF arms, 2 grippers, a mobile base, and a vertically actuated torso). For robots with lowerdimensional configuration and action spaces, we zero-pad the configuration and action vectors. For robots with fewer than three images, we also mask out the missing image slots.",
+    "zh": "由于不同数据集规模不均衡（例如更难的叠衣任务数据偏多），我们按 n^0.43 为每种“任务—机器人”组合赋权，其中 n 是该组合的样本数，从而相对降低过度代表的组合的权重。构型向量 qₜ 与动作向量 aₜ 始终使用数据集中最大机器人的维数；这里为 18，以容纳两条六自由度机械臂、两个夹爪、移动底盘及可垂直运动的躯干。低维机器人的构型和动作向量以零补齐。若机器人少于三张图像，也会将缺失图像位置掩蔽。"
+  },
+  {
+    "id": "p6-para3",
+    "page": 6,
+    "source_blocks": [
+      2
+    ],
+    "en": "In the post-training phase, we fine-tune our model with a smaller task-specific dataset to specialize it to particular downstream applications. As mentioned previously, our definition of “task” is fairly broad — e.g., the “bussing” task requires manipulating a wide range of different objects. Different tasks require very different datasets, with the simplest of the tasks necessitating only 5 hours and the most complex tasks using 100 or more hours of data.",
+    "zh": "后训练阶段使用较小的任务专用数据集微调，将模型专门化到具体下游应用。如前所述，我们对“任务”的定义相当广，例如清桌需要操作多种不同物体。不同任务所需的数据差异很大：最简单的任务只需 5 小时，而最复杂的任务使用 100 小时或更多数据。"
+  },
+  {
+    "id": "p6-para4",
+    "page": 6,
+    "source_blocks": [
+      3
+    ],
+    "en": "B. Language and high-level policies",
+    "zh": "B. 语言与高层策略"
+  },
+  {
+    "id": "p6-para5",
+    "page": 6,
+    "source_blocks": [
+      4
+    ],
+    "en": "More complex tasks that require semantic reasoning and high-level strategy, such as table bussing, can also benefit from a high-level policy that decomposes high-level tasks (such as “bus the table”) into more immediate subtasks (such as “pick up the napkin” or “throw the napkin into the trash”). Since our model is trained to process language inputs, we can use a high-level VLM to make these semantic inferences, a method that is analogous to LLM/VLM planning methods such as SayCan [2]. We use such a high-level policy to assist our model with high-level strategy for several of our experimental tasks, as we will discuss in Section VI.",
+    "zh": "清桌等需要语义推理和高层策略的复杂任务，也可受益于高层策略：将“清理桌面”分解为“拿起餐巾”“把餐巾丢进垃圾桶”等更直接的子任务。由于模型训练时就处理语言输入，我们可以使用高层 VLM 完成这些语义推断，类似 SayCan [2] 等 LLM／VLM 规划方法。我们在若干实验任务中用这样的高层策略辅助模型制定高层行动策略，详见第 VI 节。"
+  },
+  {
+    "id": "p6-para6",
+    "page": 6,
+    "source_blocks": [
+      5
+    ],
+    "en": "C. Robot system details",
+    "zh": "C. 机器人系统细节"
+  },
+  {
+    "id": "p6-para7",
+    "page": 6,
+    "source_blocks": [
+      6
+    ],
+    "en": "Our dexterous manipulation datasets include 7 different robot configurations and 68 tasks. We summarize these platforms in Figure 5, and discuss them below:",
+    "zh": "我们的灵巧操作数据集包括 7 种机器人配置和 68 项任务。图 5 汇总这些平台，下面逐一介绍。"
+  },
+  {
+    "id": "p6-para8",
+    "page": 6,
+    "source_blocks": [
+      9
+    ],
+    "en": "Fig. 5: The robots used in our experiments. These include single and dual-arm manipulators with 6-DoF and 7-DoF arms, as well as holonomic and nonholonomic mobile manipulators. π0 is trained jointly on all of these platforms.",
+    "zh": "图 5：实验使用的机器人，包括具有六自由度和七自由度机械臂的单臂、双臂系统，以及全向和非完整约束移动操作机器人。π0 在所有这些平台的数据上联合训练。"
+  },
+  {
+    "id": "p6-para9",
+    "page": 6,
+    "source_blocks": [
+      10
+    ],
+    "en": "UR5e. An arm with a parallel jaw gripper, with a wristmounted and over-the-shoulder camera, for a total of two camera images and a 7-dimensional configuration and action space. Bimanual UR5e. Two UR5e setups, for a total of three camera images and a 14-dimensional configuration and action space. Franka. The Franka setup has two cameras and an 8dimensional configuration and action space. Bimanual Trossen. This setup has two 6-DoF Trossen ViperX arms in a configuration based on the ALOHA setup [4, 57], with two wrist cameras and a base camera, and a 14dimensional configuration and action space. Bimanual ARX & bimanual AgileX. This setup uses two 6-DoF arms, and supports either ARX or AgileX arms, with three cameras (two wrist and one base) and a 14-dimensional configuration and action space. This class encompasses two distinct platforms, but we categorize them together because of their similar kinematic properties. Mobile Trossen & mobile ARX. This setup is based on the Mobile ALOHA [57] platform, with two 6-DoF arms on a mobile base, which are either ARX arms or Trossen ViperX arms. The nonholonomic base adds two action dimensions, for a 14-dimensional configuration and 16-dimensional action space. There are two wrist cameras and a base camera. This class encompasses two distinct platforms, but we categorize them together because of their similar kinematic properties. Mobile Fibocom. Two 6-DoF ARX arms on a holonomic base. The base adds three action dimensions (two for translation and one for orientation), for a 14-dimensional configuration and 17-dimensional action space. We summarize the proportion of our dataset from each robot in Figure 4.",
+    "zh": "UR5e：配平行夹爪的单机械臂，使用腕部相机与肩部上方相机，共两路图像；构型与动作空间均为 7 维。\n双臂 UR5e：两套 UR5e，共三路图像；构型与动作空间均为 14 维。\nFranka：两台相机；构型与动作空间均为 8 维。\n双臂 Trossen：基于 ALOHA [4,57] 的配置，使用两条六自由度 Trossen ViperX 机械臂、两台腕部相机和一台基座相机；构型与动作空间均为 14 维。\n双臂 ARX 与双臂 AgileX：使用两条六自由度机械臂，支持 ARX 或 AgileX；两台腕部相机加一台基座相机，共三台；构型与动作空间均为 14 维。虽然是两个不同平台，但因运动学性质相似而归为一类。\n移动 Trossen 与移动 ARX：基于 Mobile ALOHA [57]，在移动底盘上安装两条六自由度 ARX 或 Trossen ViperX 机械臂。非完整约束底盘增加两个动作维度，因此构型空间为 14 维、动作空间为 16 维；配两台腕部相机和一台基座相机。同样因运动学相近将两个平台合并分类。\n移动 Fibocom：全向底盘上安装两条六自由度 ARX 机械臂；底盘增加平移两维、朝向一维，共三个动作维度，形成 14 维构型空间与 17 维动作空间。各机器人数据占比见图 4。"
+  },
+  {
+    "id": "p6-para10",
+    "page": 6,
+    "source_blocks": [
+      11
+    ],
+    "en": "VI. EXPERIMENTAL EVALUATION",
+    "zh": "VI. 实验评估"
+  },
+  {
+    "id": "p6-para11",
+    "page": 6,
+    "source_blocks": [
+      12
+    ],
+    "en": "Our experimental evaluation consists of out-of-box evaluation experiments that compare our base (pre-trained) model",
+    "zh": "实验评估包括开箱即用测试，将基础（预训练）模型通过直接提示运行的表现与……【续下一页】"
+  },
+  {
+    "id": "p7-para1",
+    "page": 7,
+    "source_blocks": [
+      0
+    ],
+    "en": "Fig. 6: Out-of-box evaluation tasks: To evaluate our base model, we run it after pre-training on five tasks: shirt folding, bussing easy, bussing hard, grocery bagging, and toast out of toaster. The tasks require a combination of dexterous manipulation, multi-stage behaviors, and semantic recognition.",
+    "zh": "图 6：开箱即用评估任务。为评估基础模型，我们在预训练结束后，让它执行五项任务：折叠衬衫、简单清桌、困难清桌、杂货装袋以及从烤面包机取吐司。这些任务要求结合灵巧操作、多阶段行为和语义识别。"
+  },
+  {
+    "id": "p7-para2",
+    "page": 7,
+    "source_blocks": [
+      1
+    ],
+    "en": "to alternative model designs with direct prompting, as well as detailed fine-tuning experiments that evaluate our model on challenging downstream tasks, comparing it to other methods that have been proposed for dexterous manipulation. We study the following research questions: How well does π0 perform after pre-training on a variety of tasks that are present in the pre-training data? We study this question by directly evaluating π0, with comparisons to other robot foundation models. How well does π0 follow language commands? These experiments compare π0 to π0-small, a smaller version of our model without VLM initialization, to evaluate its performance on following language commands. We evaluate with both human-provided commands and commands specified by a high-level VLM policy, as discussed in Section V-B. How does π0 compare to methods that have been proposed specifically for addressing dexterous manipulation tasks? These experiments study downstream tasks for which we can either fine-tune our model from the pre-trained initialization, or train it from scratch on task-specific data, comparing to prior methods that were proposed for dexterous manipulation. We aim to evaluate both the benefits of our architecture and our pre-training procedure. Can π0 be adapted to complex, multi-stage tasks? In our final set of experiments, we fine-tune π0 to a set of particularly complex tasks, including folding laundry and bussing a table. These tasks take between 5 and 20 minutes to complete. Some require guidance from a high-level policy.",
+    "zh": "【承接上一页】……其他模型设计比较；同时开展详细微调实验，在具有挑战性的下游任务上将模型与既有灵巧操作方法比较。我们研究以下问题：\nπ0 在预训练后，能多好地完成预训练数据中包含的多种任务？我们直接评估 π0，并与其他机器人基础模型比较。\nπ0 能多好地遵循语言命令？我们将其与 π0-small 比较；后者是没有 VLM 初始化的小型版本。评估既使用人类提供的指令，也使用第 V-B 节的高层 VLM 策略给出的指令。\nπ0 与专为灵巧操作提出的方法相比如何？针对下游任务，我们既可以从预训练初始化微调，也可以仅使用任务专用数据从头训练，并与既有灵巧操作方法比较，以分别评估架构与预训练流程的收益。\nπ0 能否适配复杂多阶段任务？最后一组实验针对叠衣和清桌等特别复杂的任务微调。任务持续 5～20 分钟，部分需要高层策略引导。"
+  },
+  {
+    "id": "p7-para3",
+    "page": 7,
+    "source_blocks": [
+      2
+    ],
+    "en": "A. Evaluating the base model",
+    "zh": "A. 基础模型评估"
+  },
+  {
+    "id": "p7-para4",
+    "page": 7,
+    "source_blocks": [
+      3,
+      4
+    ],
+    "en": "In our first set of experiments, we evaluate the model after pre-training on our full mixture, without any post-training, to evaluate how well our base model can perform a variety of tasks. We compare to other robot foundation models in the literature: both VLAs and smaller models that are trained from scratch on the same pre-training mixture. We evaluate on the following tasks, visualized in Figure 6, with each task commanded to the same base model via a language command. Shirt folding: the robot must fold a t-shirt, which starts flattened. Bussing easy: the robot must clean a table, putting trash in the trash bin and dishes into the dish bin. The score indicates the number of objects that were placed in the correct receptacle. Bussing hard: a harder version of the bussing task, with more objects and more challenging configurations, such as utensils intentionally placed on top of trash objects, objects obstructing each other, and some objects that are not in the pre-training dataset. Grocery bagging: the robot must bag all grocery items, such as potato chips, marshmallows, and cat food. Toast out of toaster: the robot removes toast from a toaster.",
+    "zh": "第一组实验在全部混合数据预训练结束后直接评估，不进行后训练，以考察基础模型完成多种任务的能力。比较对象包括文献中的其他机器人基础模型：既有 VLA，也有在相同预训练混合数据上从头训练的小模型。图 6 展示以下任务，均通过语言命令交给同一个基础模型。\n折叠衬衫：把一件开始时已铺平的 T 恤折好。\n简单清桌：清理桌面，把垃圾放进垃圾桶、餐具放进餐具箱；得分反映正确放入相应容器的物体数量。\n困难清桌：物体更多、布局更复杂，例如餐具故意放在垃圾上方、物体相互遮挡，以及出现预训练数据中没有的物体。\n杂货装袋：把薯片、棉花糖、猫粮等全部杂货装进袋子。\n取出吐司：从烤面包机中取出吐司。"
+  },
+  {
+    "id": "p7-para5",
+    "page": 7,
+    "source_blocks": [
+      5
+    ],
+    "en": "Providing comparisons for these experiments is challenging because very few prior models can operate at this scale. We compare to OpenVLA [24], a 7B parameter VLA model that was originally trained on the OXE dataset [10]. We train OpenVLA on our full mixture. This is a very difficult mixture for OpenVLA, which does not support action chunking or high-frequency control. We also compare to Octo [50], a smaller 93M parameter model. While Octo is not a VLA, it does use a diffusion process to generate actions, providing a valuable point of comparison for our flow matching VLA. We also train Octo on the same mixture as our model. Due to time constraints, we were unable to train OpenVLA and Octo for the same number of epochs as our full model. We therefore also compare to a “compute parity” version of our model, which is trained for only 160k steps (as opposed to 700k steps for our main model), which is equal to or lower than the number of steps provided to the baselines (160k for OpenVLA, 320k for Octo). We also include a version of the OpenVLA model that we fine-tuned only on the UR5e data, without cross-embodiment training, in the hopes of providing an even stronger baseline on the UR5e tasks. Finally, we include a comparison to the π0-small model described in Section IV, which can be viewed as a scaled-down version of our model without VLM pre-training.",
+    "zh": "为这些实验提供比较很有挑战性，因为很少有既有模型能在这一规模运行。我们比较了 OpenVLA [24]，一个最初在 OXE [10] 上训练的 70 亿参数 VLA，并将其在完整混合数据上训练。这对不支持动作分块或高频控制的原版 OpenVLA 很困难。还比较了 Octo [50]，一个 9300 万参数的小模型；它虽不是 VLA，却使用扩散过程生成动作，是流匹配 VLA 的有价值对照。Octo 也在相同混合数据上训练。由于时间限制，OpenVLA 和 Octo 无法训练到与完整模型相同的 epoch 数，因此我们另外比较“计算量对齐”的 π0：仅训练 16 万步，而主要模型训练 70 万步；对照方法分别为 OpenVLA 16 万步、Octo 32 万步。我们还提供仅在 UR5e 数据上微调、没有跨本体训练的 OpenVLA，以期在 UR5e 任务上得到更强基线。最后比较第 IV 节的 π0-small，可视为没有 VLM 预训练的缩小版本。"
+  },
+  {
+    "id": "p7-para6",
+    "page": 7,
+    "source_blocks": [
+      6
+    ],
+    "en": "The evaluation metric uses a normalized score averaged over 10 episodes per task and method, where an episode receives a score of 1.0 for a full success, and a fractional score for partial success. For example, the score for bussing is the fraction of objects that are correctly placed in the proper receptacle. We describe the scoring rubrics in Appendix E. The results, shown in Figure 7, show that π0 attains by far the best results across the board on all the out-of-box tasks, with near perfect success rates on shirt folding and the easier bussing tasks, and large improvements over all baselines. The “parity” version of π0, which is trained for only 160k steps, still outperforms all the baselines, and even π0-small outperforms OpenVLA and Octo. OpenVLA struggles on these tasks because its autoregressive discretization architecture does not support action chunks. The UR5e-only OpenVLA model performs better, but is still far",
+    "zh": "评估指标是每种方法、每项任务运行 10 回合后的平均归一化得分：完全成功为 1.0，部分成功给予相应分数。例如清桌得分为放入正确容器的物体比例。评分细则见附录 E。图 7 显示，π0 在全部开箱即用任务中取得明显最优结果；折衬衫与简单清桌任务接近完全成功，且显著优于所有基线。仅训练 16 万步的对齐版本仍超过全部基线，甚至 π0-small 也优于 OpenVLA 与 Octo。OpenVLA 在这些任务上困难较大，因为其自回归离散化架构不支持动作块。仅用 UR5e 数据的 OpenVLA 表现有所改善，但仍远……【续下一页】"
+  },
+  {
+    "id": "p8-para1",
+    "page": 8,
+    "source_blocks": [
+      22
+    ],
+    "en": "Fig. 7: Out-of-box evaluation results: We evaluate π0 trained for the full 700k steps, a version trained for 160k steps that matches the number of updates for baseline models, π0-small, and three baselines: OpenVLA and Octo trained on all of our data, and OpenVLA trained only on the UR5e tasks (which we found to work better on UR5e tasks). Across all tasks and all comparisons, even the “parity” version of our model outperforms all baselines, and the full version of our model achieves the best results by a large margin.",
+    "zh": "图 7：开箱即用评估结果。我们比较训练完整 70 万步的 π0、训练 16 万步以匹配基线更新数量的版本、π0-small，以及三个基线：在全部数据上训练的 OpenVLA 与 Octo，以及仅在 UR5e 任务上训练的 OpenVLA（后者在 UR5e 任务上更好）。在所有任务和比较中，即使对齐版本也超过全部基线，完整版本则以较大优势取得最佳结果。"
+  },
+  {
+    "id": "p8-para2",
+    "page": 8,
+    "source_blocks": [
+      23
+    ],
+    "en": "below the performance of π0. Octo does support action chunks, but has a comparatively limited representational capacity. This comparison illustrates the importance of combining large, expressive architectures with the ability to model complex distributions via flow matching or diffusion. Additionally, the comparison to π0-small illustrates the importance of incorporating VLM pre-training. Unfortunately, it is hard to make this last comparison fair: π0-small uses fewer parameters, but larger models are difficult to use without pre-training. Overall, these experiments show that π0 provides a powerful pretrained model with the ability to effectively perform a variety of tasks with a variety of robots, with much better performance than prior models.",
+    "zh": "【承接上一页】……低于 π0。Octo 虽支持动作块，但表示能力相对有限。这说明，需要将大型、表达力强的架构与流匹配或扩散所提供的复杂分布建模能力结合起来。与 π0-small 的比较也体现了引入 VLM 预训练的重要性。不过，这个比较很难完全公平：π0-small 参数更少，而没有预训练的大模型又难以使用。总体来看，这些实验表明，π0 提供了一个强大的预训练模型，能通过多种机器人有效完成多种任务，表现明显优于此前模型。"
+  },
+  {
+    "id": "p8-para3",
+    "page": 8,
+    "source_blocks": [
+      24
+    ],
+    "en": "B. Following language commands",
+    "zh": "B. 遵循语言命令"
+  },
+  {
+    "id": "p8-para4",
+    "page": 8,
+    "source_blocks": [
+      25
+    ],
+    "en": "In the next set of experiments, we fine-tune the base π0 model to follow language commands in a set of evaluation domains. We compare this fine-tuned π0 model with the π0small model described in Section IV, which we found to be the strongest baseline in the previous section. Recall that π0-small does not use a VLM initialization. This experiment therefore aims to measure how much VLM pre-training boosts our model’s ability to follow language instructions. Note that π0-small is also a significantly smaller model — unfortunately, it is difficult to remove this confounder, because VLM initialization serves both to make it practical to train a much larger model without overfitting, and to improve language instruction following. We nonetheless hope that this experiment sheds light on the language capabilities of π0. The language instructions for each task consist of objects to pick up and locations to place those objects, with languagelabeled segments that are about 2 seconds in length. Each full",
+    "zh": "下一组实验微调基础 π0，使其在若干评估领域遵循语言命令，并与上一节最强基线 π0-small 比较。后者没有 VLM 初始化，因此本实验旨在衡量 VLM 预训练对语言指令遵循能力的提升。需要注意，π0-small 也显著更小，这一混杂因素难以消除：VLM 初始化既让更大模型能够在不过拟合的情况下训练，也能改善语言理解。尽管如此，我们希望实验能揭示 π0 的语言能力。每项任务的语言指令包含待抓物体与目标放置位置，语言标注片段长度约 2 秒。每个完整……【续右栏】"
+  },
+  {
+    "id": "p8-para5",
+    "page": 8,
+    "source_blocks": [
+      26
+    ],
+    "en": "Fig. 8: The tasks in our language evaluation. We evaluate our model on 3 different language-conditioned tasks, each of which requires following a sequence of intermediate language commands. The tasks involve bussing a table (top) to put dishes in a bin and garbage in a trash bin, setting a table (middle) by taking items out of a bin, and packing a shopping bag (bottom).",
+    "zh": "图 8：语言评估任务。模型在三项语言条件任务上评估，每项都要遵循一系列中间语言命令。任务包括清桌（上）：把餐具放入收纳箱、垃圾放入垃圾桶；摆桌（中）：从箱子取出物品摆放；购物装袋（下）。"
+  },
+  {
+    "id": "p8-para6",
+    "page": 8,
+    "source_blocks": [
+      27
+    ],
+    "en": "task consists of numerous such segments. The tasks in this evaluation consist of: Bussing: the robot must clean a table, placing dishes and cutlery in a bin, and trash into a trash bin. Table setting: the robot must take out items from a bin to set a table, including a place mat, dishes, silverware, napkin, and cups, and adjust them according to language instructions. Grocery bagging: the robot must pack grocery items, such as bags of coffee beans, barley, marshmallow, seaweed, almonds, spaghetti, and cans into a bag.",
+    "zh": "【承接左栏】……任务包含许多这样的片段。具体任务为：\n清桌：将餐具、刀叉放入箱子，将垃圾放入垃圾桶。\n摆桌：从箱子取出餐垫、餐具、刀叉、餐巾和杯子来布置餐桌，并按语言指令调整。\n杂货装袋：将咖啡豆、大麦、棉花糖、海苔、杏仁、意大利面及罐头等装入袋子。"
+  },
+  {
+    "id": "p8-para7",
+    "page": 8,
+    "source_blocks": [
+      28
+    ],
+    "en": "In Figure 8, we show the language-conditioned tasks in our evaluation and present the evaluation results. We evaluate five different conditions. π0-flat (and π0-small-flat) corresponds to directly command the model with the task description (e.g., “bag the groceries”), without intermediate language commands. π0-human (and π0-small-human) provides intermediate step commands (e.g., which object to pick and where to place it) from an expert human user. These conditions evaluate each model’s ability to follow more detailed language commands: while these intermediate commands provide considerable information for how to perform the task, the model must be able to understand and follow those commands to benefit from them. Finally, π0-HL evaluates π0 with high-level commands provided by a high-level VLM, as discussed in Section V-B. This condition is also autonomous, without any human expert.",
+    "zh": "图 8 展示语言条件任务及评估结果。共评估五种设置。π0-flat 与 π0-small-flat 只接收总体任务描述，例如“把杂货装袋”，不提供中间指令。π0-human 与 π0-small-human 由专家用户提供中间步骤指令，例如抓哪个物体、放到哪里。这些设置考察模型遵循细致语言命令的能力：中间指令虽然提供了大量任务信息，但模型必须能理解并遵循，才能受益。最后，π0-HL 使用第 V-B 节高层 VLM 提供的命令；这一设置也是自主的，不依赖人类专家。"
+  },
+  {
+    "id": "p8-para8",
+    "page": 8,
+    "source_blocks": [
+      29
+    ],
+    "en": "The results in Figure 9, averaging over 10 trials per task, show that the language following accuracy of π0 is significantly better than that of π0-small. This suggests a significant improvement from the larger pre-trained VLM initialization. This capability translates to an improvement in performance with expert human guidance (π0-human) and with high-level model guidance (π0-HL). The results indicate that π0’s language following ability directly translates into better autonomous performance on complex tasks with highlevel guidance.",
+    "zh": "图 9 的结果对每项任务 10 次试验取平均，显示 π0 的语言遵循准确率显著高于 π0-small，表明较大的预训练 VLM 初始化带来了明显改善。这进一步转化为专家人类引导（π0-human）和高层模型引导（π0-HL）下的性能提升。结果说明，π0 的语言遵循能力能够直接转化为高层引导下复杂任务的自主执行能力。"
+  },
+  {
+    "id": "p8-para9",
+    "page": 8,
+    "source_blocks": [
+      30
+    ],
+    "en": "C. Learning new dexterous tasks",
+    "zh": "C. 学习新的灵巧任务"
+  },
+  {
+    "id": "p9-para1",
+    "page": 9,
+    "source_blocks": [
+      0
+    ],
+    "en": "Fig. 9: Language evaluation. We compare “flat” versions of our policies, −flat, which receive only the overall task command (e.g., “bag the groceries”) with a method that receives intermediate commands from a human expert, −human, or a high-level VLM policy, −HL. We also compare our model to a small non-VLM variant under the “expert” condition, π0 and π0-small, in terms of language following accuracy. The results show a significant improvement with π0 from intermediate language commands provided by a human expert and to a lesser degree by an autonomous high-level policy. Notably, due to π0-small’s limited language following ability, overall it does not gain with the addition of a high-level expert.",
+    "zh": "图 9：语言评估。比较只接收整体任务命令的 −flat 版本，与接收人类专家中间指令的 −human 或高层 VLM 指令的 −HL 版本。同时，在专家引导设置下比较 π0 与小型非 VLM 版本的语言遵循准确率。结果表明，人类专家提供中间命令可明显改善 π0，自主高层策略也有改善但幅度较小。值得注意的是，π0-small 因语言遵循能力有限，整体上没有从增加高层专家中获益。"
+  },
+  {
+    "id": "p9-para2",
+    "page": 9,
+    "source_blocks": [
+      1
+    ],
+    "en": "requiring entirely new behaviors. For these evaluations, we fine-tune the model using various amounts of data for each new task. While each task is new, we partition the tasks into “tiers” depending on how much they differ from tasks in the pre-training data. The tasks, shown in Figure 10, are: UR5e stack bowls. This task requires stacking bowls, with four bowls of different sizes. Since this task requires grasping and moving dishes like the bussing task in the pre-training data, we place it in the “easy” tier. The training data contains a variety of bowls, and the evaluations use a mix of seen and unseen bowls. Towel folding. This task requires folding a towel. Since this is similar to shirt folding, which is present in pre-training, we place it in the “easy” tier. Tupperware in microwave. This task requires opening a microwave, putting a plastic container inside it, and closing it. The containers come in different shapes and colors, and the evaluations use a mix of seen and unseen containers. The container manipulation resembles pre-training data, but the microwave is not found in pre-training. Paper towel replacement. This task requires removing an old cardboard paper towel tube from a holder and replacing it with a fresh paper towel roll. Because no such items are found in pre-training, we consider this “hard.” Franka items in drawer. This task requires opening a drawer, packing items into a drawer, and closing it. Because there is no similar task with the Franka robot in pre-training, we consider this “hard.”",
+    "zh": "【本页原文从上文片段继续，意为任务要求全新的行为。】针对这些评估，我们分别用不同数据量微调每个新任务。虽然任务都是新的，但按与预训练任务差异的大小分为不同等级，见图 10。\nUR5e 叠碗：将四个不同大小的碗堆叠。因抓取和移动餐具类似预训练中的清桌，将其归为“容易”。训练使用多种碗，测试同时包含见过和未见过的碗。\n折毛巾：因为类似预训练中的折衬衫，也归为“容易”。\n将保鲜盒放入微波炉：打开微波炉、放入塑料容器、再关门。容器形状和颜色不同，测试包含见过及未见过的容器。容器操作类似预训练，但微波炉没有出现在预训练中。\n更换厨房纸卷：从支架取下旧纸筒，装上新纸卷。预训练中没有此类物体，因此归为“困难”。\nFranka 将物品放入抽屉：打开抽屉、放入物品、关抽屉。预训练中没有 Franka 的类似任务，因此归为“困难”。"
+  },
+  {
+    "id": "p9-para3",
+    "page": 9,
+    "source_blocks": [
+      2,
+      4
+    ],
+    "en": "We compare our model after fine-tuning both to OpenVLA [24] and Octo [50], which also employ a pre-training and fine-tuning recipe. Since our aim is to evaluate the specific models (rather than the architectures), we use the publicly available pre-trained checkpoints for these models, which are trained on OXE [10], and then fine-tune them to each task. We also compare to ACT [57] and Diffusion Policy [9], which are designed specifically for learning dexterous tasks from smaller datasets. ACT and Diffusion Policy are trained only on the fine-tuning datasets, which are of similar size to the individual datasets used in the ACT and Diffusion Policy experiments [9, 57]. We evaluate π0 by fine-tuning from our pre-trained base model, as well as by training from scratch. This comparison is meant to evaluate the individual benefits of the π0 architecture and our pre-training procedure. We hypothesize that the π0 architecture with VLM initialization should already provide a stronger starting point for the individual tasks, while the pre-training procedure should further improve its performance, especially with smaller fine-tuning datasets.",
+    "zh": "我们把微调后的模型与同样采用预训练／微调方案的 OpenVLA [24]、Octo [50] 比较。目标是评估具体模型，而非仅比较架构，所以使用它们在 OXE [10] 上训练的公开检查点，再分别微调到目标任务。还比较了 ACT [57] 与 Diffusion Policy [9]，它们专门面向用较小数据集学习灵巧任务；两者只在微调数据集上训练，这些数据规模与其原实验中的单任务数据集相近 [9,57]。对 π0，既评估从预训练基础模型微调，也评估从头训练，以区分架构与预训练流程的收益。我们假设，具有 VLM 初始化的 π0 架构已能提供更强起点，而机器人预训练会进一步改善表现，尤其在微调数据较少时。"
+  },
+  {
+    "id": "p9-para4",
+    "page": 9,
+    "source_blocks": [
+      3
+    ],
+    "en": "Fig. 10: Fine-tuning evaluation tasks: We fine-tune our model to a variety of downstream tasks that are distinct from the tasks seen in pre-training. Our tasks represent a range of similarity from the pre-training tasks, with tasks that are most similar to pre-training (stack bowls and towel folding), a task that introduces an unseen new element (a microwave), and tasks that require new motions and new object types (Franka items in drawer and paper towel replacement).",
+    "zh": "图 10：微调评估任务。模型适配多个不同于预训练任务的下游任务。任务与预训练的相似程度各不相同：最相似的是叠碗和折毛巾；微波炉任务引入未见过的新元素；Franka 物品入抽屉与更换纸卷则要求新动作和新物体类型。"
+  },
+  {
+    "id": "p9-para5",
+    "page": 9,
+    "source_blocks": [
+      5
+    ],
+    "en": "Figure 11 shows the performance across all of the tasks for a variety of methods, averaging over 10 trials per task, with different amounts of fine-tuning data on each task. We include all of the baselines on the stack bowls and Tupperware in microwave tasks. Since OpenVLA and Octo attain significantly worse performance, we only run these for one of the dataset sizes, due to the time cost of evaluating so many models in the real world. The results show that π0 generally outperforms other methods. Interestingly, the strongest prior models are the ones that are trained entirely from scratch on the target tasks, suggesting that leveraging pre-training in these domains presents a major challenge for prior approaches. While the 5hour policy for π0 on the Tupperware task performs similarly to the baselines, the 1-hour version is significantly better. As expected, pre-training leads to larger improvement for tasks",
+    "zh": "图 11 展示不同方法在各任务、不同微调数据量下的表现，每项任务平均 10 次测试。在叠碗与保鲜盒进微波炉任务上纳入全部基线。由于 OpenVLA 与 Octo 表现明显较差，且真实世界评估许多模型耗时较大，因此它们只在一种数据规模下运行。结果显示，π0 通常优于其他方法。有趣的是，最强的既有方法反而是完全在目标任务上从头训练的方法，说明已有方法在这些领域利用预训练仍面临重大挑战。π0 在保鲜盒任务上使用 5 小时数据时与基线相近，但使用 1 小时数据时明显更优。符合预期的是，预训练对于那些与预训练数据更……【续下一页】"
+  },
+  {
+    "id": "p10-para1",
+    "page": 10,
+    "source_blocks": [
+      44
+    ],
+    "en": "Fig. 11: Fine-tuning with varying amounts of data. π0 can learn some easier tasks even with smaller amounts of data, and the pre-trained model often attains a larger improvement over the model trained from scratch.",
+    "zh": "图 11：不同数据量下的微调。π0 在较少数据下也能学会一些较容易任务，预训练模型往往比从头训练模型获得更大的提升。"
+  },
+  {
+    "id": "p10-para2",
+    "page": 10,
+    "source_blocks": [
+      45
+    ],
+    "en": "that are more similar to the pre-training data, though the pretrained model is frequently better than the non-pre-trained model, sometimes by as much as 2x.",
+    "zh": "【承接上一页】……相似的任务带来更大改善。不过预训练模型经常也优于非预训练模型，有时达到后者的两倍。"
+  },
+  {
+    "id": "p10-para3",
+    "page": 10,
+    "source_blocks": [
+      46
+    ],
+    "en": "D. Mastering complex multi-stage tasks",
+    "zh": "D. 掌握复杂多阶段任务"
+  },
+  {
+    "id": "p10-para4",
+    "page": 10,
+    "source_blocks": [
+      47
+    ],
+    "en": "In our final set of experiments, we tackle a range of challenging multi-stage tasks via a combination of fine-tuning and language. For some of these tasks, data is present in pretraining, but fine-tuning is required to attain mastery. For some, no data is present in pre-training. The tasks in this evaluation, shown in Figure 12, are: Laundry folding: This task requires a static (non-mobile) bimanual system to fold articles of clothing. The clothing items start in a randomized crumpled state in a bin, and the goal is to take out the item, fold it, and place it on top of a stack of previously folded items. The randomized initial configuration of the crumpled laundry presents a major challenge, since the policy needs to generalize to any configuration. This task is present in pre-training. Mobile laundry: Here, the Fibocom mobile robot in Figure 5 has to fold laundry, facing many of the same challenges while controlling orientation and translation. This task is present in pre-training. Dryer unloading: Here, the Fibocom mobile robot has to take laundry out of a dryer and place it into a hamper. This task is present in pre-training. Table bussing: This task requires bussing a table with a diverse array of novel objects in a clutter scene, presenting a much greater challenge than the benchmark in our out-ofbox evaluation: the policy must generalize to unseen objects",
+    "zh": "最后一组实验结合微调与语言，处理一系列具有挑战性的多阶段任务。有些任务在预训练中有数据，但要达到熟练水平仍需微调；另一些则完全没有出现在预训练中。图 12 展示这些任务。\n叠衣：固定式双臂机器人将衣物从篮中取出、折叠，并叠放到已折好的衣物上。衣物初始时随机揉皱，模型必须泛化到任意构型，这是主要挑战。该任务存在于预训练中。\n移动叠衣：图 5 的 Fibocom 移动机器人折叠衣物，同时控制朝向和移动，面临许多相同挑战。该任务存在于预训练中。\n清空烘干机：Fibocom 从烘干机取出衣物并放入篮子。该任务存在于预训练中。\n清桌：在拥挤场景中清理种类多样的新物体，比开箱即用测试中的基准困难得多；策略必须泛化到形状和大小各异的……【续右栏】"
+  },
+  {
+    "id": "p10-para5",
+    "page": 10,
+    "source_blocks": [
+      48
+    ],
+    "en": "of varying shapes and sizes, and perform complex dexterous motions, such as twisting the gripper to pick up large plates and carefully grasping thin, delicate items such as glasses. The robot must handle dense clutter and intelligently sequence various behaviors — for example, to clean off a plate with trash, it must first pick up the plate, then shake its contents into the garbage, and then place the plate in the bin. This task is not present in pre-training. Box building: The robot has to assemble a cardboard box that starts in a flattened state. This task presents a number of major challenges: the box needs to bent in the right way, and the robot needs to hold down parts of the box while folding others, utilizing both arms and even the surface of the table to brace during folding motions. The robot might need to retry some folds, requiring a reactive and intelligent strategy. This task is not present in pre-training. To-go box: This task requires moving several food items from a plate into a to-go box, requiring packing the items into the box so that they do not stick out, and then closing the box with both arms. This task is not present in pre-training. Packing eggs: The robot needs to take six eggs out of a bowl and pack them into an egg carton, and then close the carton. The eggs need to be grasped in a manner appropriate to their pose inside the bowl, and then placed into open slots in the carton. This presents challenges due to the egg shape, slipperiness, and the need for careful placement. Closing the box requires the use of both arms. This task is not present in pre-training.",
+    "zh": "【承接左栏】……未见物体，并完成复杂灵巧动作，例如旋转夹爪来抓大盘子，或谨慎抓取玻璃杯等薄而脆弱的物品。机器人必须处理密集杂乱场景并合理安排动作顺序：例如清理装有垃圾的盘子时，先拿盘子、把内容物抖入垃圾桶，再把盘子放入箱子。这个任务不在预训练中。\n组装纸盒：从平铺纸板开始组装盒子。需要正确弯折，一边按住某些部分、一边折其他部分，同时利用双臂甚至桌面提供支撑。有时需要重试折叠，因此要求具备反应性且合理的策略。该任务不在预训练中。\n打包餐盒：把盘子上的数样食物放进外带餐盒，摆放时不能突出盒外，最后用双臂关盒。该任务不在预训练中。\n鸡蛋装盒：从碗中取出六个鸡蛋，放入蛋盒并关盖。必须根据鸡蛋在碗中的姿态适当抓取，再放入空槽；蛋的形状、易滑性及精确放置需求带来挑战，关盒需使用双臂。该任务不在预训练中。"
+  },
+  {
+    "id": "p11-para1",
+    "page": 11,
+    "source_blocks": [
+      0
+    ],
+    "en": "Fig. 12: We evaluate a range of complex and temporally extended tasks. This includes: folding laundry from a bin with a stationary (a) or mobile (b) robot, bussing a real lunch table (c), assembling a box (d), packing eggs into a carton (e), and packing food into a to-go box (f). These tasks require combining dozens of individual behaviors, such as grasping, stacking, folding, and flattening, generalization to a huge variety of object configurations, and complex physical properties, such as deformable objects or flexible cardboard.",
+    "zh": "图 12：评估一系列复杂长时任务，包括固定式机器人（a）或移动机器人（b）从篮中取衣并折叠、清理真实午餐桌（c）、组装纸盒（d）、鸡蛋装盒（e）和食物装入外带餐盒（f）。这些任务需要组合数十种抓取、堆叠、折叠、铺平等基本行为，泛化到大量物体构型，并处理可变形物体和柔性纸板等复杂物理性质。"
+  },
+  {
+    "id": "p11-para2",
+    "page": 11,
+    "source_blocks": [
+      1
+    ],
+    "en": "are presented in Figure 13. The scoring rubrics are in Appendix E. A score of 1.0 represents a perfect execution, while partial scores correspond to partially completed tasks (e.g., 0.5 indicates that half the objects were bussed correctly). These tasks are very difficult, and we were not able to solve them with other methods. We therefore use these tasks to compare to ablations of our approach, evaluating π0 after pre-training and fine-tuning, out of the box after pre-training only (“outof-box”), and training on the fine-tuning data without any pre-training (“scratch”). The results show that π0 can solve many of these tasks, with our full pre-training and fine-tuning recipe performing best across the board. Note that many of these more difficult tasks show a very large improvement from using the pre-trained model, indicating that pre-training is especially useful with harder tasks. The absolute performance of π0 varies across the tasks, likely due to differences in task difficulty and the degree to which the tasks are represented in pre-training. We recommend that readers watch the task videos on the accompanying website for a more complete impression of these tasks and their complexity. We believe that this level of autonomous performance on such challenging tasks represents a new state of the art in dexterous robot manipulation with learned policies.",
+    "zh": "【原文续段】结果见图 13，评分细则见附录 E。1.0 分表示完美执行，部分得分对应任务部分完成，例如 0.5 表示一半物品被正确清理。这些任务很困难，我们未能用其他方法解决，因此用它们比较本方法的消融版本：预训练再微调的 π0、仅预训练后的开箱即用版本，以及不做预训练、只在微调数据上训练的“scratch”版本。结果表明 π0 能解决其中许多任务，完整的预训练加微调方案整体最佳。许多困难任务从预训练中获得特别大的提升，说明预训练在更难任务上尤其有用。π0 的绝对表现因任务而异，可能由任务难度及其在预训练中被覆盖的程度造成。建议读者观看配套网站的视频，以更完整理解任务及其复杂性。我们认为，在这些挑战任务上达到这样的自主表现，代表了学习型灵巧机器人操作的新水平。"
+  },
+  {
+    "id": "p11-para3",
+    "page": 11,
+    "source_blocks": [
+      2
+    ],
+    "en": "VII. DISCUSSION, LIMITATIONS, AND FUTURE WORK",
+    "zh": "VII. 讨论、局限性与未来工作"
+  },
+  {
+    "id": "p11-para4",
+    "page": 11,
+    "source_blocks": [
+      3
+    ],
+    "en": "We presented a framework for training a robot foundation model, which we refer to as π0, that consists of pretraining on highly diverse data, followed by either out-ofbox evaluation or fine-tuning to complex downstream tasks.",
+    "zh": "我们提出了名为 π0 的机器人基础模型训练框架：先在高度多样化数据上预训练，随后直接评估，或针对复杂下游任务微调。"
+  },
+  {
+    "id": "p11-para5",
+    "page": 11,
+    "source_blocks": [
+      4
+    ],
+    "en": "Fig. 13: Post-training results on complex tasks in terms of average scores over 10 trials. The full pre-trained π0 model attains more than 50% of the maximum score across all of the tasks, and typically outperforms the ablations, with especially significant improvements on the hardest tasks.",
+    "zh": "图 13：复杂任务后训练结果，报告每项任务 10 次试验的平均得分。完整的预训练 π0 在所有任务上都超过最高分的 50%，通常优于消融版本，在最困难任务上改善尤为明显。"
+  },
+  {
+    "id": "p11-para6",
+    "page": 11,
+    "source_blocks": [
+      5
+    ],
+    "en": "Our empirical evaluation studies tasks that combine dexterity, generalization, and temporally extended multi-stage behaviors. Our model incorporates Internet-scale vision-language model (VLM) pre-training with flow matching for representing complex high-frequency action chunks. Our pre-training mixture consists of 10,000 hours of dexterous manipulation data from 7 different robot configurations and 68 tasks, in addition to large amounts of previously collected robot manipulation data from OXE [10], DROID [23], and Bridge [52]. To our knowledge, this represents the largest pre-training mixture ever used for a robot manipulation model. Our fine-tuning experiments include over 20 tasks, where we show that our model outperforms a variety of baselines, including prior VLA models [24] and models designed specifically for dexterous manipulation [57, 9]. We also examine how our post-training recipe can enable highly complex tasks, such as folding multiple articles of clothing from arbitrary initial configurations or assembling boxes.",
+    "zh": "实证评估研究了结合灵巧性、泛化以及长时多阶段行为的任务。模型将互联网规模的 VLM 预训练与流匹配结合，表示复杂的高频动作块。预训练混合数据包括来自 7 种机器人配置、68 项任务的 10,000 小时灵巧操作数据，以及 OXE [10]、DROID [23] 和 Bridge [52] 等先前采集的大量机器人操作数据。据我们所知，这是机器人操作模型使用过的最大预训练混合数据。微调实验涉及超过 20 项任务，模型优于多种基线，包括此前的 VLA [24] 以及专为灵巧操作设计的模型 [57,9]。我们也研究后训练方案怎样支持从任意初始构型连续叠多件衣物或组装纸盒等高度复杂任务。"
+  },
+  {
+    "id": "p11-para7",
+    "page": 11,
+    "source_blocks": [
+      6
+    ],
+    "en": "Our framework broadly resembles the training procedures employed for large language models, which typically consist of pre-training a base model on very large datasets scraped from the web, followed by a post-training procedure that aims to “align” the model to enable it to follow instructions and perform user commands. It is generally recognized that most of the “knowledge” in such models is acquired in the pretraining phase, while the post-training phase serves to tell the model how it should leverage that knowledge to fulfill user commands. Our experiments imply that an analogous",
+    "zh": "这个框架总体类似大语言模型的训练过程：先在互联网收集的超大数据集上预训练基础模型，再通过后训练“对齐”，使其遵循指令并执行用户命令。通常认为，大多数“知识”在预训练阶段获得，而后训练告诉模型怎样运用知识满足用户要求。我们的实验表明，机器人基础模型可能也有类似……【续下一页】"
+  },
+  {
+    "id": "p12-para1",
+    "page": 12,
+    "source_blocks": [
+      0
+    ],
+    "en": "phenomenon might take place with robot foundation models, where pre-trained models have some zero-shot capabilities, but complex tasks like laundry following require fine-tuning with high-quality data. Training on only this high-quality data results in a brittle model that does not reliably recover from mistakes, while running the pre-trained model in zero shot does not always exhibit the fluent strategies demonstrated in the post-training data.",
+    "zh": "【承接上一页】……现象：预训练模型具有一定零样本能力，但叠衣等复杂任务需要高质量数据微调。只在高质量数据上训练，会得到无法可靠从错误中恢复的脆弱模型；只做预训练后零样本执行，又未必展现后训练数据中流畅的策略。"
+  },
+  {
+    "id": "p12-para2",
+    "page": 12,
+    "source_blocks": [
+      1
+    ],
+    "en": "We hope that our results will serve as a stepping stone toward general and broadly applicable robot foundation models. Our experiments suggest that such models may soon be a reality, but there are a number of limitations and ample room for future work. First, our experiments do not yet provide a comprehensive understanding of how the pre-training datasets should be composed: we combined all data available to us, but understanding what type of data is more helpful to add and how it should be weighted remains an open problem. Not all tasks in our evaluation work reliably, and it remains unclear how to predict how much and what kind of data is needed to attain near-perfect performance. Finally, it remains to be seen how much positive transfer there is in combining highly diverse data, particularly from different tasks and different robots: although our results suggest that universal pre-trained robot foundation models might become a reality, it is left for future work to understand whether this universality extends to much more distinct domains, such as autonomous driving, navigation, and legged locomotion.",
+    "zh": "我们希望这些结果成为迈向通用、广泛适用机器人基础模型的踏脚石。实验表明这类模型或许很快能成为现实，但仍有局限和大量未来工作。首先，实验尚未全面解释预训练数据应如何组成：我们组合了所有可获得的数据，但哪类新增数据更有帮助、该怎样赋权，仍是开放问题。并非所有评估任务都能可靠完成；如何预测达到近乎完美表现所需的数据数量与类型，仍不清楚。最后，组合高度多样的数据，尤其来自不同任务、不同机器人时，到底能产生多少正迁移，还待研究。虽然结果暗示统一的预训练机器人基础模型可能实现，但这种通用性是否延伸到自动驾驶、导航和足式运动等差异更大的领域，仍有待未来工作回答。"
+  },
+  {
+    "id": "p12-para3",
+    "page": 12,
+    "source_blocks": [
+      2
+    ],
+    "en": "ACKNOWLEDGEMENTS",
+    "zh": "致谢"
+  },
+  {
+    "id": "p12-para4",
+    "page": 12,
+    "source_blocks": [
+      3
+    ],
+    "en": "We thank Laura Smith and Dibya Ghosh for feedback on the paper and assistance with figures and videos, Philip Clark, Kelly Sims, and Saunaz Moradi for feedback on writing, and Evan Pokrandt, Joakim Keussen, Dan Philibin, Eitan Penner, Adam Lisagor, and Greg Miller for help with illustrations, design, and videos. We also thank Lili Yu for helpful technical discussion. We are tremendously grateful to all of the robot operators for tirelessly collecting robot manipulation data. For a full contribution statement, see Appendix A.",
+    "zh": "感谢 Laura Smith 和 Dibya Ghosh 对论文的反馈及对图表、视频的帮助；感谢 Philip Clark、Kelly Sims、Saunaz Moradi 对写作的反馈；感谢 Evan Pokrandt、Joakim Keussen、Dan Philibin、Eitan Penner、Adam Lisagor、Greg Miller 对插图、设计和视频的帮助。感谢 Lili Yu 的技术讨论。尤其感谢所有不辞辛劳采集机器人操作数据的操作人员。完整贡献声明见附录 A。"
+  },
+  {
+    "id": "p12-para5",
+    "page": 12,
+    "source_blocks": [
+      4
+    ],
+    "en": "REFERENCES",
+    "zh": "参考文献。以下书目信息及第 13～15 页相应条目保留英文，便于按作者、标题、编号检索；可在本页原始页面或原 PDF 中查看。"
+  },
+  {
+    "id": "p15-para1",
+    "page": 15,
+    "source_blocks": [
+      5
+    ],
+    "en": "APPENDIX",
+    "zh": "附录"
+  },
+  {
+    "id": "p15-para2",
+    "page": 15,
+    "source_blocks": [
+      6
+    ],
+    "en": "A. Contributions",
+    "zh": "A. 作者贡献"
+  },
+  {
+    "id": "p15-para3",
+    "page": 15,
+    "source_blocks": [
+      7
+    ],
+    "en": "The authors contributed to the following areas (listed alphabetically): Data and operations: Noah Brown, Michael Equi, Chelsea Finn, Niccolo Fusai, Lachy Groom, Liyiming Ke, Suraj Nair, Lucy Shi, and Anna Walling. Evaluation experiments: Kevin Black, Michael Equi, Chelsea Finn, Brian Ichter, Liyiming Ke, Adrian Li-Bell, Suraj Nair, Karl Pertsch, and Lucy Shi. Model design: Kevin Black, Brian Ichter, Sergey Levine, Karl Pertsch, Lucy Shi, and Quan Vuong. Post-training: Michael Equi, Chelsea Finn, Liyiming Ke, Adrian Li-Bell, Suraj Nair, and Lucy Shi. Pre-training: Kevin Black, Danny Driess, Brian Ichter, Sergey Levine, Karl Pertsch, Lucy Shi, and Quan Vuong. Robot hardware: Noah Brown, Adnan Esmail, Chelsea Finn, Tim Jones, and Mohith Mothukuri. Robot software: Karol Hausman, Szymon Jakubczak, Sergey Levine, James Tanner, and Haohuan Wang. Training infrastructure: Kevin Black, Michael Equi, Sergey Levine, Adrian Li-Bell, Suraj Nair, Quan Vuong, Haohuan Wang, and Ury Zhilinsky. Writing and illustration: Kevin Black, Chelsea Finn, Lachy Groom, Karol Hausman, Brian Ichter, Sergey Levine, and Quan Vuong.",
+    "zh": "作者在以下领域作出贡献，姓名按字母顺序列出：\n数据与运营：Noah Brown、Michael Equi、Chelsea Finn、Niccolo Fusai、Lachy Groom、Liyiming Ke、Suraj Nair、Lucy Shi、Anna Walling。\n评估实验：Kevin Black、Michael Equi、Chelsea Finn、Brian Ichter、Liyiming Ke、Adrian Li-Bell、Suraj Nair、Karl Pertsch、Lucy Shi。\n模型设计：Kevin Black、Brian Ichter、Sergey Levine、Karl Pertsch、Lucy Shi、Quan Vuong。\n后训练：Michael Equi、Chelsea Finn、Liyiming Ke、Adrian Li-Bell、Suraj Nair、Lucy Shi。\n预训练：Kevin Black、Danny Driess、Brian Ichter、Sergey Levine、Karl Pertsch、Lucy Shi、Quan Vuong。\n机器人硬件：Noah Brown、Adnan Esmail、Chelsea Finn、Tim Jones、Mohith Mothukuri。\n机器人软件：Karol Hausman、Szymon Jakubczak、Sergey Levine、James Tanner、Haohuan Wang。\n训练基础设施：Kevin Black、Michael Equi、Sergey Levine、Adrian Li-Bell、Suraj Nair、Quan Vuong、Haohuan Wang、Ury Zhilinsky。\n写作与插图：Kevin Black、Chelsea Finn、Lachy Groom、Karol Hausman、Brian Ichter、Sergey Levine、Quan Vuong。"
+  },
+  {
+    "id": "p15-para4",
+    "page": 15,
+    "source_blocks": [
+      8
+    ],
+    "en": "B. Model Architecture Details",
+    "zh": "B. 模型架构细节"
+  },
+  {
+    "id": "p15-para5",
+    "page": 15,
+    "source_blocks": [
+      9,
+      10
+    ],
+    "en": "In this section, we provide a full description of the model architecture. We follow the PaliGemma VLM [5] design, with the following differences: (1) additional input and output projections for the robotics-specific tokens, including the state vector qt and action vectors At = [at, ..., at+H−1], (2) an additional MLP for incorporating the flow matching timestep information τ, and (3) a second, smaller set of weights for the action expert.",
+    "zh": "本节完整描述模型架构。我们遵循 PaliGemma VLM [5] 的设计，区别如下：（1）为机器人专用 token 增加输入与输出投影，处理状态向量 qₜ 和动作向量 Aₜ=[aₜ,…,aₜ₊H₋₁]；（2）增加一个 MLP，纳入流匹配时间 τ；（3）为动作专家增加第二套更小的权重。"
+  },
+  {
+    "id": "p15-para6",
+    "page": 15,
+    "source_blocks": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "en": "Additional inputs and outputs. The standard PaliGemma architecture takes in a sequence of images [I1 t, ..., In t ] followed by a language prompt ℓt. We add an input qt for the robot’s proprioceptive state, which is mapped to the transformer embedding dimension using a linear projection. The final set of input tokens correspond to the noisy action chunk Aτ t = [aτ t , ..., aτ t+H−1], with the number of tokens equal to the action horizon (H = 50 for our tasks). We only use the transformer outputs corresponding to the H noisy actions, which are decoded into vθ(Aτ t , ot) using a linear projection. Incorporating the flow matching timestep. The noisy action chunk Aτ",
+    "zh": "额外输入与输出。标准 PaliGemma 以图像序列 [Iₜ¹,…,Iₜⁿ] 及其后的语言提示 ℓₜ 为输入。我们增加机器人本体感知状态 qₜ，通过线性投影映射至 Transformer 嵌入维度。最后一组输入 token 对应带噪动作块 Aₜ^τ=[aₜ^τ,…,aₜ₊H₋₁^τ]，token 数等于动作预测长度 H，本文任务取 H=50。只使用对应 H 个带噪动作的 Transformer 输出，并通过线性投影解码为 vθ(Aₜ^τ,oₜ)。\n【下一段标题】纳入流匹配时间步。带噪动作块……"
+  },
+  {
+    "id": "p15-para7",
+    "page": 15,
+    "source_blocks": [
+      18,
+      19,
+      20
+    ],
+    "en": "t is mapped to the transformer’s embedding dimension using an MLP that also incorporates the flow matching timestep τ. For each noisy action aτ t′, the expression for the corresponding embedding that is fed into the transformer is W3 · swish(W2 · concat(W1 · aτ t′, ϕ(τ))), where ϕ : R →Rw is a sinusoidal positional encoding function [51], W1 ∈Rw×d, W2 ∈Rw×2w, W3 ∈Rw×w, d is the action dimension, and w is the embedding dimension (or width) of the action expert.",
+    "zh": "【承接上一段】……Aₜ^τ 经一个同时纳入流匹配时间 τ 的 MLP 映射至 Transformer 嵌入维度。对于每个带噪动作 aₜ′^τ，其输入 Transformer 的嵌入为：W₃·swish(W₂·concat(W₁·aₜ′^τ, φ(τ)))。其中 φ:ℝ→ℝʷ 是正弦位置编码函数 [51]；W₁∈ℝʷˣᵈ，W₂∈ℝʷˣ²ʷ，W₃∈ℝʷˣʷ；d 为动作维数，w 为动作专家的嵌入维数（宽度）。公式原排版见左侧截图。"
+  },
+  {
+    "id": "p15-para8",
+    "page": 15,
+    "source_blocks": [
+      21,
+      22,
+      23,
+      24,
+      25
+    ],
+    "en": "Attention mask. π0 uses a blockwise causal attention mask with 3 blocks: [I1 t, ..., In t , ℓt], [qt], and [aτ t , ..., aτ t+H−1]. Within each block, there is full bidirectional attention, whereas the tokens in each block cannot attend to the tokens in future blocks. The first block includes the input modalities from PaliGemma’s VLM pre-training, which are prevented from attending to future blocks (which include new inputs) to minimize distribution shift from said pre-training. The robot state qt is its own block because it does not change with each flow matching integration step; preventing it from attending to the final block allows its corresponding keys and values to be cached during sampling. The final block corresponds to the noisy actions Aτ",
+    "zh": "注意力掩码。π0 使用分块因果注意力掩码，包含三个块：[图像序列, ℓₜ]、[qₜ]、[带噪动作序列]。每个块内部完全双向注意，但不能关注后续块中的 token。第一块包含 PaliGemma 在 VLM 预训练时就使用的模态；禁止它关注包含新输入的后续块，是为了尽量减少相对于预训练的分布偏移。机器人状态 qₜ 独立成块，因为它不会随每次流匹配积分改变；禁止其关注最后一个块，就能在采样期间缓存它的键和值。最后一个块对应带噪动作……【续下一段】"
+  },
+  {
+    "id": "p15-para9",
+    "page": 15,
+    "source_blocks": [
+      26,
+      27,
+      28,
+      29
+    ],
+    "en": "t , which can attend to the full input sequence. Action expert. π0 is implemented as a single transformer with two sets of weights (also known as experts [45]), where each token is routed to one of the experts; the weights interact only through the transformer’s self-attention layers. The images and language prompt, [I1 t, ..., In t , ℓt], are routed to the larger VLM backbone, which we initialize from PaliGemma. The inputs not seen during VLM pretraining, [qt, Aτ t ], are routed to the action expert. PaliGemma is based on the Gemma 2B [49] language model, which uses multi-query attention [44] and a configuration of {width=2048, depth=18, mlp dim=16,384, num heads=18, num kv heads=1, head dim=256}. Since the experts interact only in the self-attention layers, width and mlp dim do not necessarily need to match between experts. To speed up inference (which requires multiple forward passes of the action expert), we downsize the action expert to {width=1024, mlp dim=4096}, resulting in a parameter count of ∼300M.",
+    "zh": "【承接上一段】……Aₜ^τ，可关注整个输入序列。\n动作专家。π0 实现为具有两套权重（也称专家 [45]）的单个 Transformer，每个 token 被路由到其中一套；两套权重只通过 Transformer 的自注意力层交互。图像与语言提示被路由至从 PaliGemma 初始化的较大 VLM 骨干；VLM 预训练未见的输入 [qₜ,Aₜ^τ] 被路由至动作专家。PaliGemma 基于 Gemma 2B [49]，采用多查询注意力 [44]，文中给出的配置为 width=2048、depth=18、mlp_dim=16,384、num_heads=18、num_kv_heads=1、head_dim=256。由于专家只在自注意力层交互，它们的 width 和 mlp_dim 不必相同。为加速需要多次前向的动作专家推理，将其缩小为 width=1024、mlp_dim=4096，参数量约 3 亿。"
+  },
+  {
+    "id": "p15-para10",
+    "page": 15,
+    "source_blocks": [
+      30
+    ],
+    "en": "Sampling the flow matching timestep. The original flow matching papers [28, 32] sample the flow matching timestep",
+    "zh": "流匹配时间步采样。原始流匹配论文 [28,32] 从……【续下一页】"
+  },
+  {
+    "id": "p16-para1",
+    "page": 16,
+    "source_blocks": [
+      2
+    ],
+    "en": "Fig. 14: Flow matching timestep sampling distribution. We sample τ from a shifted beta distribution that emphasizes lower timesteps (corresponding to noisier actions), and does not sample timesteps at all above a cutoff value s. We use s = 0.999 in our experiments.",
+    "zh": "图 14：流匹配时间步采样分布。τ 从平移变换后的 Beta 分布中采样，该分布更强调较小时间步（对应更高噪声动作），且完全不采样超过截断值 s 的时间步。实验取 s=0.999。"
+  },
+  {
+    "id": "p16-para2",
+    "page": 16,
+    "source_blocks": [
+      3,
+      4
+    ],
+    "en": "from a uniform distribution: τ ∼U(0, 1). Esser et al. [14] instead propose sampling from a logit-normal distribution that emphasizes the middle timesteps; the authors posit that at high timesteps (low noise levels), the model needs only to learn the identity function, and at low timesteps (high noise levels), the model needs only to learn the mean of the data distribution. However, we hypothesize that the task of action prediction is subtly different from high-resolution image synthesis — while it may be relatively easy to predict the mean image conditioned on a text label, predicting the mean action conditioned on a robot observation (i.e., learning E[At|ot]) is a much harder problem; this is because the observation ot is very informative in that it should constrain the distribution of possible actions much more than a text label constrains the distribution of possible images. As a result, we designed a timestep sampling distribution that emphasizes low timesteps (high noise levels); additionally, timesteps above a given threshold s are not sampled at all, since they are not needed so long as the integration step δ is greater than 1−s. The distribution is given by p(τ) = Beta( s−τ s ; 1.5, 1) and is visualized in Figure 14. We use s = 0.999 in our experiments, which allows for δ > 1 1000, or up to 1,000 integration steps.",
+    "zh": "【承接上一页】……均匀分布 τ∼U(0,1) 中采样。Esser 等 [14] 则提出从强调中间时间步的 logit-normal 分布采样，认为高时间步（低噪声）只需学恒等函数，而低时间步（高噪声）只需学数据分布均值。不过，我们认为动作预测与高分辨率图像生成存在细微差别：给定文本标签预测平均图像可能较容易，但给定机器人观察预测平均动作，即学习 E[Aₜ|oₜ]，要困难得多，因为观察 oₜ 包含的信息丰富，对可能动作分布的约束应远强于文本标签对图像分布的约束。因此我们设计了强调低时间步、高噪声水平的采样分布。此外，完全不采样高于阈值 s 的时间步；只要积分步长 δ 大于 1−s，就不需要这些时间步。分布在原文中写为 p(τ)=Beta((s−τ)/s;1.5,1)，见图 14。实验取 s=0.999，可使用大于 1/1000 的 δ，文中描述为最多约 1000 个积分步骤。"
+  },
+  {
+    "id": "p16-para3",
+    "page": 16,
+    "source_blocks": [
+      5
+    ],
+    "en": "C. Non-VLM Baseline Architecture",
+    "zh": "C. 非 VLM 基线架构"
+  },
+  {
+    "id": "p16-para4",
+    "page": 16,
+    "source_blocks": [
+      6,
+      7
+    ],
+    "en": "Our baseline architecture π0-small is not based on a VLM backbone. Hence, we use it to evaluate the benefits of VLMpre-training. We design it to be sufficiently expressive to fit our large dataset while still providing good performance when trained from scratch. This model has about 470M parameters, and differs from our main model in the following ways: (1) We use DistilBERT [42] to encode the language tokens of the language command ℓt, since this model does not use a language model backbone; (2) The action expert cross-attends to the outputs of the observation encoder, akin to a traditional encoder-decoder transformer [51], rather than our main model which is more like a decoder-only mixture of experts [45]; (3) The images are encoded with a smaller pre-trained ViT encoder (specifically, the R26-S-32 ResNet-ViT hybrid from Steiner et al. [47]); (4) The ViT image encoders do not share weights; (5) The transformer backbone that encodes the observations (which comes after the ViT image encoders) is not pre-trained on Internet data; (6) The action expert uses the DiT architecture [36] rather than the Gemma architecture, and hence incorporates the flow-matching timestep τ using AdaLN-Zero layers. Besides this, the models are broadly similar: both use pre-trained ViT image encoders, both use separate weights for the observation encoder and the action expert, both take in the same observation format, and both perform 10 steps of flow matching to predict the action chunk.",
+    "zh": "π0-small 不以 VLM 为骨干，因此用它评估 VLM 预训练的收益。我们让它具有足够表达力以拟合大数据集，同时从头训练时仍有较好表现。其参数量约 4.7 亿，与主模型的区别是：（1）因为没有语言模型骨干，使用 DistilBERT [42] 编码语言命令 ℓₜ；（2）动作专家通过交叉注意力读取观察编码器输出，类似传统编码器—解码器 Transformer [51]，主模型则更像仅解码器的混合专家模型 [45]；（3）图像使用较小的预训练 ViT 编码器，具体是 Steiner 等 [47] 的 R26-S-32 ResNet-ViT 混合架构；（4）不同 ViT 图像编码器不共享权重；（5）图像编码器之后、负责编码观察的 Transformer 骨干未在互联网数据上预训练；（6）动作专家采用 DiT [36] 而非 Gemma，并通过 AdaLN-Zero 层纳入流匹配时间 τ。除此之外两者总体相似：都使用预训练 ViT 图像编码器，观察编码器与动作专家使用独立权重，输入观察格式相同，并执行 10 步流匹配来预测动作块。"
+  },
+  {
+    "id": "p16-para5",
+    "page": 16,
+    "source_blocks": [
+      8
+    ],
+    "en": "D. Inference",
+    "zh": "D. 推理"
+  },
+  {
+    "id": "p16-para6",
+    "page": 16,
+    "source_blocks": [
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "en": "Recall that our model takes an observation ot = [I1 t, ..., In t , ℓt, qt] and the noisy actions Aτ t and outputs the vector field that needs to be integrated to obtain the next flow matching step, vτ t . Each time we predict a new action chunk At, we must encode each of the images I1 t, ..., In t , run a forward pass on the tokens corresponding to ot, and then run 10 steps of flow matching, where each step requires running a forward pass on the tokens corresponding to Aτ t (the keys and values corresponding to ot are cached). Table I summarizes the computation time for this operation with 3 camera images. The operations were timed on an NVIDIA GeForce RTX 4090 consumer-grade GPU. For the mobile robot, inference was done off-board over a Wi-Fi connection, adding a small amount of network latency. Further optimizations, quantization, and other improvements might further reduce inference times.",
+    "zh": "回顾一下：模型接收观察 oₜ=[图像序列, ℓₜ, qₜ] 和带噪动作 Aₜ^τ，输出下一步流匹配积分所需的向量场 vₜ^τ。每次预测新动作块 Aₜ，先编码所有图像，再对 oₜ 对应的 token 做一次前向，随后执行 10 步流匹配；每步对 Aₜ^τ 对应的 token 做前向，而 oₜ 的键和值会缓存。表 I 汇总使用三路相机图像时的计算耗时，测试设备为消费级 NVIDIA GeForce RTX 4090。对于移动机器人，推理运行在机器人之外，经 Wi-Fi 通信，因此增加少量网络延迟。进一步优化、量化等方法可能继续降低推理耗时。"
+  },
+  {
+    "id": "p16-para7",
+    "page": 16,
+    "source_blocks": [
+      17
+    ],
+    "en": "Since the model generates an entire H-step action chunk at once, we can execute up to H actions before we need to run inference again. However, we may run inference more often than that, as well as combine actions from different inference calls using various aggregation strategies. We tried temporal ensembling [57] early on and found that it hurt policy performance, so we opted not to aggregate actions and instead execute action chunks open-loop. For the 20Hz UR5e and Franka robots, we run inference every 0.8 seconds (after executing 16 actions), and for all other robots, which run at 50Hz, we run inference every 0.5 seconds (after executing 25 actions).",
+    "zh": "因为模型一次生成完整的 H 步动作块，理论上最多可执行 H 条动作再进行下一次推理。但也可以更频繁推理，并采用各种聚合策略组合不同推理调用的动作。我们早期尝试了时间集成 [57]，发现损害策略表现，因此最终不聚合动作，而是以开环方式执行动作块。对于运行频率 20 Hz 的 UR5e 与 Franka，每执行 16 条动作、即每 0.8 秒推理一次；其他机器人运行在 50 Hz，每执行 25 条动作、即每 0.5 秒推理一次。"
+  },
+  {
+    "id": "p16-para8",
+    "page": 16,
+    "source_blocks": [
+      18,
+      19,
+      20,
+      21
+    ],
+    "en": "model part inference time image encoders 14 ms observation forward pass 32 ms x10 action forward pass (flow) 27 ms network latency (if off-board) 13 ms total on-board inference 73 ms total off-board inference 86 ms TABLE I: Inference time of our model on an NVIDIA GeForce RTX 4090 GPU.",
+    "zh": "表 I：模型在 NVIDIA GeForce RTX 4090 上的推理耗时。\n图像编码器：14 ms。\n观察前向：32 ms。\n10 次动作前向（流匹配）：合计 27 ms。\n网络延迟（若使用机外推理）：13 ms。\n机载推理总计：73 ms。\n机外推理总计：86 ms。\n以上为论文测试设置，不是当前 Windows CPU 的实测速度。最后这一句为译者说明。"
+  },
+  {
+    "id": "p16-para9",
+    "page": 16,
+    "source_blocks": [
+      22
+    ],
+    "en": "E. Evaluation Details",
+    "zh": "E. 评估细节"
+  },
+  {
+    "id": "p16-para10",
+    "page": 16,
+    "source_blocks": [
+      23
+    ],
+    "en": "For each task, we design a score rubric that measures progress on the task, and use this for our quantitative results.",
+    "zh": "我们为每项任务设计衡量完成进度的评分规则，并以此得到定量结果。"
+  },
+  {
+    "id": "p17-para1",
+    "page": 17,
+    "source_blocks": [
+      0
+    ],
+    "en": "We describe this rubric for each task below: A. Evaluating the base model Shirt folding: Shirt folding is recorded as either success or failure. We begin each shirt folding eval by laying the shirt flat on the table. Success is defined as having folded in the sleeves and performed one half-fold along the length of the shirt. Our eval includes 4 small t-shirts and 1 medium t-shirt. We run 2 evals for each item for a maximum of 15000 steps or approximately 5 minutes each. Bussing easy: This task is scored out of 7, where there are 7 different objects on the table, and 1 point is given for each correctly sorted object. Bussing hard: This task is scored out of 12, where there are 12 different objects on the table, and 1 point is given for each correctly sorted object. This version of the task includes particularly challenging settings, like a chopstick on top of a piece of trash. Grocery bagging: This task is scored out of 7. For each 7 grocery items, a point is given for putting it in the bag. Toast out of toaster: This task is scored out of 4. For each piece of toast, 1 point is given for picking it from the toaster and another for putting it on the plate. B. Language instruction following. The policy is scored on successfully repositioning each object and whether it follows instructions. Bussing: The robot has to follow the command to pick up the correct object and place each of them into the correct receptacle. The robot receives 12 objects in total and around 30 instructions in one episode. Table setting: The robot arranges all dishes, utensils, and napkins and makes adjustments according to language specification. The robot receives 7 objects in total and around 20 instructions in one episode. Grocery bagging: The robot picks up the correct item (among bag of coffee beans, bag of barley, bag of marshmallow, cat food, spaghetti, bag of seaweed, bag of almonds), and bags them into a paper bag. The robot receives 7 objects in total and around 14 instructions in one episode. C. Learning new dexterous tasks Stack bowls: This task is scored out of 3. One point for each of two bowls stacked in larger bowls, and one for the neatness of the final product. Towel folding: This task is scored out of 3. One point for the first half-fold of the towel, one point for the second half-fold of the towel, and one point for neatness of the final product. Tupperware in microwave: This task is scored out of 4. One point for opening the microwave, one point for picking up the Tupperware, one point for putting the Tupperware in the microwave, and one point for closing the microwave. Paper towel replacement: This task is scored out of 4. One point is given for grasping the old roll, and another point is given for removing it. Then, one point is given for grasping the new paper towel roll, and the final point is given for placing it on the dispenser. Items in drawer: This task is scored out of 5. One point for opening the drawer, one point for each of 3 items picked and",
+    "zh": "下面分别描述各项评分规则。\nA. 基础模型评估\n折叠衬衫：记为成功或失败。开始时将衣服铺平；成功要求将袖子折入，并沿衣身长度方向对折一次。评估使用 4 件小号 T 恤和 1 件中号 T 恤，每件测试 2 次，每次最多 15,000 步，约 5 分钟。\n简单清桌：满分 7 分，桌上 7 个不同物体，每正确分类一个得 1 分。\n困难清桌：满分 12 分，桌上 12 个不同物体，每正确分类一个得 1 分。包含筷子放在垃圾上方等困难布局。\n杂货装袋：满分 7 分，7 件杂货每装入一件得 1 分。\n取出吐司：满分 4 分，每片吐司从烤面包机取出得 1 分，放到盘子上再得 1 分。\nB. 语言指令遵循\n从成功重新放置物体和是否遵循指令两方面评分。\n清桌：按指令抓取正确物体并放到正确容器，每回合共 12 个物体、约 30 条指令。\n摆桌：摆放全部餐具和餐巾，并按语言要求调整；每回合共 7 个物体、约 20 条指令。\n杂货装袋：从咖啡豆、大麦、棉花糖、猫粮、意大利面、海苔、杏仁中选择正确物品并装进纸袋；每回合 7 个物体、约 14 条指令。\nC. 学习新的灵巧任务\n叠碗：满分 3 分，两只碗分别叠入更大碗中各得 1 分，最终整齐度得 1 分。\n折毛巾：满分 3 分，第一次对折、第二次对折、最终整齐度各 1 分。\n保鲜盒进微波炉：满分 4 分，开门、抓取保鲜盒、放进微波炉、关门各 1 分。\n更换纸卷：满分 4 分，抓旧纸卷、取下旧纸卷、抓新纸卷、将新纸卷装到支架各 1 分。\n物品入抽屉：满分 5 分，开抽屉 1 分，三件物品每抓起并……【续右栏】"
+  },
+  {
+    "id": "p17-para2",
+    "page": 17,
+    "source_blocks": [
+      1
+    ],
+    "en": "placed into the drawer, and one point for closing the drawer. D. Mastering complex multi-stage tasks Laundry folding: This task is scored out of 4. Our evaluation includes five items, three shirts of size M, L, and XL and two shorts of size 28 and 36. We perform two trials for each item, and the items left to be evaluated start randomly crumpled in a laundry bin (while previously evaluated items start in a folded stack). One point is given for picking an item out of the bin and putting it on the table. Another point is given for flattening the shirt or shorts. A third point is granted for folding the shirt or shorts. A final point is given for either placing the item in the corner of the table (if it is the first item evaluated), or stacking it onto an existing stack of folded clothes. We run each eval for a maximum of 15000 steps or approximately 5 minutes. Mobile laundry: This evaluation follows the same protocol as laundry folding. The three shirts are sized M, M, and XL, and the shorts are sized 32 and 31 W. Table bussing: This task is scored out of 12, where there are 12 different objects on the table, and 1 point is given for each correctly sorted object. This version of the task includes particularly challenging settings, like a chopstick on top of a piece of trash. Box building: This task is scored out of 5. One point is given for successfully picking up the box to begin the task. One point is given for folding the box in half, so the flaps can be closed. One point is given for closing the right flap. One point is given for closing the left flap. The final point is given for neatly centering the final product. Packing eggs: This task is scored out of 7. One point for each egg placed in the correct slot in the carton, and one point for closing the lid. Packing food: This task is scored out of 5. One point for picking up the plate of food, one point for each of 3 food items placed in the to-go box, and one point for closing the to-go box. Dryer unloading: This task involves having the robot approach a dyer with a laundry basket and unload the clothes into the basket. We score this eval out of five, where one point is given for properly approaching the dryer. Another for placing the laundry basket on the stool. A third for opening the dryer. A fourth for putting all the clothes in the basket and a fifth point for closing the dryer. We eval with 3 shirts and 2 shorts that start in a random configuration inside the dryer.",
+    "zh": "【承接左栏】……放进抽屉各 1 分，关抽屉 1 分。\nD. 掌握复杂多阶段任务\n叠衣：满分 4 分。评估使用 5 件衣物：M、L、XL 三件上衣，以及 28、36 码两条短裤。每件测试 2 次。待评估衣物随机揉皱放在篮子里，已评估衣物预先叠放。取衣放到桌上 1 分、铺平 1 分、折叠 1 分；最后放到桌角（若是第一件）或叠到已折衣堆上 1 分。每次最多 15,000 步，约 5 分钟。\n移动叠衣：遵循相同流程，三件上衣尺码为 M、M、XL，短裤为 32 和 31 W。\n清桌：满分 12 分，12 个不同物体，每正确分类一个 1 分，包含筷子压在垃圾上等困难情况。\n组装纸盒：满分 5 分，成功拿起纸盒开始任务、将盒体折成能合上翼片的形态、关右翼片、关左翼片、最后整齐居中摆放，各 1 分。\n鸡蛋装盒：满分 7 分，每颗鸡蛋正确放入槽位得 1 分，关盖得 1 分。\n食物打包：满分 5 分，拿起装食物的盘子 1 分，三样食物每放入餐盒一种得 1 分，关餐盒 1 分。\n清空烘干机：机器人带着洗衣篮靠近烘干机并将衣物取入篮子。满分 5 分：正确靠近、把篮子放到凳子上、开烘干机、把全部衣物放进篮子、关烘干机，各 1 分。使用随机放在烘干机内的 3 件上衣和 2 条短裤评估。"
+  }
+]
